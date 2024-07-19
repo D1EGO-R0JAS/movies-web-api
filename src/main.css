@@ -1,0 +1,246 @@
+*{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html{
+    font-size: 62.5%;    
+    background-color: var(--color-Black);
+}
+:root{
+    --secondary-color: #5BC0BE;
+    --icons-color: #6FFFE9;
+    --letters-color: #ffffff;
+    --background-color:#1C2541;
+    --color-emphasize: #3A506B;
+    --color-Black: #0B132B;
+    --font: "Roboto", sans-serif;
+}
+.movies{
+    width: 100%;
+    height: auto;
+}
+.categoryMovies{
+    padding: 20px 10px 0 10px;
+    width: 100%;
+    margin-bottom: 20px;
+}
+.categoryMovies h2{
+    text-align: start;
+    font-family: var(--font);
+    color: var(--letters-color);
+    font-size: 2rem;
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+.btnPrev , .btnNext{
+    position: absolute;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    background-color: var(--color-emphasize);
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.btnPrev{
+    left:  10px;
+}
+.btnNext{
+    right: 10px;
+}
+.categoryMovie--Container{
+    display: grid;
+    grid-template-columns: repeat(20,150px);
+    grid-template-rows: repeat(1, 225px);
+    margin: 35px 10px;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+}
+.posterMovieImage{
+    position: relative;
+}
+.infoMovie{
+    display: none;
+}
+.posterMovieImage img:nth-last-child(2){
+    width: 100%;
+    border-radius: 10px;
+    z-index: -2;
+    height: 225px;
+    position: absolute;
+}
+.posterMovieImage:hover{
+    transform: scale(1.05);
+}
+.posterMovieImage:hover > .infoMovie{
+    background: linear-gradient(rgba(5, 7, 12, 0.6), rgba(5, 7, 12, 0.6));
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 10px;
+}
+.infoMovie h3{
+    font-size: 1.4rem;
+    color: var(--icons-color);
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+.infoMovie p{
+    font-size: 1.2rem;
+    color: var(--letters-color);
+    margin-bottom: 5px;
+}
+.infoMovie p:nth-last-child(2){
+    display: block;
+    max-height: 77px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    font-weight: 300;
+}
+.infoMovie img{
+    width: 12px;
+    height: 12px;
+    margin: 0 5px;
+}
+.infoMovie ul{
+    font-size: 1.2rem;
+    color: var(--icons-color);
+    list-style: none;
+    display: flex;
+    gap: 10px;
+}
+/** Estilos de la pagina de solo un genero **/
+.moviesGenre{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 5px;
+}
+.noRecomendations{
+    text-align: center;
+    height: 43vh;
+}
+.moviesGenre h2{
+    color: var(--letters-color);
+    font-size: 2rem;
+    margin: 30px 0 10px 0;
+}
+.moviesGenre--Container{
+    display: grid;
+    grid-template-columns: repeat(2, 130px);
+    grid-auto-rows: 195px;
+    gap: 15px;
+    margin: 20px 0;
+    justify-content: center;
+}
+.movieGenrePoster{
+    position: relative;
+}
+.movieGenreInfo{
+    display: none;
+}
+.movieGenrePoster img:nth-last-child(2){
+    width: 100%;
+    border-radius: 10px;
+    z-index: -2;
+    max-height: 195px;
+    position: absolute;
+}
+.movieGenrePoster:hover{
+    transform: scale(1.05);
+}
+.movieGenrePoster:hover > .movieGenreInfo{
+    background: linear-gradient(rgba(5, 7, 12, 0.6), rgba(5, 7, 12, 0.6));
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 10px;   
+}
+.movieGenreInfo h3{
+    font-size: 1.4rem;
+    color: var(--icons-color);
+    margin-bottom: 5px;
+    cursor: pointer;
+}
+.movieGenreInfo p{
+    font-size: 1.2rem;
+    color: var(--letters-color);
+    margin-bottom: 5px;
+}
+.movieGenreInfo p:nth-last-child(2){
+    display: block;
+    max-height: 77px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    font-weight: 300;
+}
+.movieGenreInfo img{
+    width: 12px;
+    height: 12px;
+    margin: 0 5px;
+}
+.movieGenreInfo ul{
+    font-size: 1.2rem;
+    color: var(--icons-color);
+    list-style: none;
+    display: flex;
+    gap: 10px;
+}
+/** fin de estilos de la pagina de solo un genero **/
+footer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--color-emphasize);
+    padding: 10px 0;
+}
+footer h3{
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+    color: var(--letters-color);
+}
+footer ul{
+    display: flex;
+    list-style: none;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+footer img{
+    width: 20px;
+    height: 20px;
+}
+footer p{
+    font-size: .8;
+    color: var(--letters-color);
+}
+
+@media (min-width:500px) {
+    .moviesGenre--Container{
+        width: 100%;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 200px));
+        grid-auto-rows: 300px;
+        gap: 20px;
+        margin-bottom: 60px;
+    }
+    .movieGenrePoster img:nth-last-child(2){
+        max-height: 300px;
+    }
+    .moviesGenre h2{
+        color: var(--letters-color);
+        font-size: 3rem;
+        margin-bottom: 10px;
+    }
+}

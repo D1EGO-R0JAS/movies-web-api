@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies Land</title>
+    <link rel="stylesheet" href="src/header.css">
+    <link rel="stylesheet" href="./src/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="nav">
+            <label class="hamburger">
+                <input type="checkbox">
+                <svg viewBox="0 0 32 32">
+                  <path class="line line-top-bottom" d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"></path>
+                  <path class="line" d="M7 16 27 16"></path>
+                </svg>
+            </label>
+            <ul class="options inactive">
+                <li class="options-one listMovieType">Peliculas
+                    <ul>
+                        <li>Estrenos</li>
+                        <li>Tendencias</li>
+                        <li>Populares</li>
+                    </ul>
+                </li>
+                <li class="options-one listMovieGenre">Generos
+                    <ul>
+                        <li>Acción</li>
+                        <li>Terror</li>
+                        <li>Comedia</li>
+                        <li>Misterio</li>
+                        <li>Romance</li>
+                        <li>Ciencia ficción</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>Movies Land</p>
+            <svg class="searchIcon" width="34px" height="34px" viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><g clip-path="url(#clip0_15_152)"><circle cx="10.5" cy="10.5" r="6.5" stroke="#6FFFE9" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="#6FFFE9"></path></g><defs><clipPath id="clip0_15_152"><rect width="24" height="24" fill="none"></rect></clipPath></defs></g></svg>              
+            <div class="formContainer inactive">
+                <form class="form">
+                    <button>
+                        <svg width="17" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="search">
+                            <path d="M7.667 12.667A5.333 5.333 0 107.667 2a5.333 5.333 0 000 10.667zM14.334 14l-2.9-2.9" stroke="currentColor" stroke-width="1.333" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                    </button>
+                    <input class="input" placeholder="Type your text" required="" type="text">
+                    <button class="reset" type="reset">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <a class="btnReturn inactive"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512"><path fill="none" stroke="#6FFFE9" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M328 112L184 256l144 144"/></svg></a>
+        <section class="previewTrendingMovies changePreviewTrendingMovies">
+            <!-- <div class="slideContainer">
+                <article class="backgroundImageMovie" id="slide1">
+                    <figure><img src="https://image.tmdb.org/t/p/w300/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg" alt=""></figure>
+                    <div class="previewTrendingMovies--infoMovie">
+                        <h2>StarWars Jedis Comming</h2>
+                        <p><img src="./src/img/star-regular.png" alt=""> 7.3</p>
+                        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quasi dolorum illo, quidem commodi maiores dicta quaerat quae inventore quam dolores beatae perspiciatis ipsam veniam eaque assumenda alias! Quibusdam, nobis explicabo!</p>
+                        <ul>
+                            <li>accion</li>
+                            <li>aventura</li>
+                            <li>comedia</li>
+                        </ul>
+                    </div>
+                </article>
+                <a href="#slide3"><</a>
+                <a href="#slide2">></a>
+            </div> -->
+        </section>
+        <section class="movies changeMovies">
+            <!-- <article class="categoryMovies">
+                <h2>Accion</h2>
+                <button onclick="left()" class="btnPrev"><</button>
+                <button onclick="scrollRight()" class="btnNext">></button>                
+                <div class="categoryMovie--Container">
+                    <div class="posterMovieImage">
+                        <img src="https://image.tmdb.org/t/p/w300/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg" alt="">
+                        <div class="infoMovie">
+                            <h3>Jedis Comming</h3>
+                            <p><img src="./src/img/star-regular.png" alt="">7.3</p>
+                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Non illum reprehenderit nisi accusamus, magnam unde ex labore earum. Saepe sunt blanditiis suscipit obcaecati nulla cupiditate pariatur cum debitis doloribus necessitatibus.</p>
+                            <ul>
+                                <li>Comedy</li>
+                                <li>Romance</li>
+                            </ul>
+                        </div>
+                    </div>                     
+                </div>                
+            </article> -->
+        </section>
+    </main>
+    <footer>
+        <h3>Movies Land</h3>
+        <ul>
+            <li><a href="#"><img src="./src/img/facebook.png" alt=""></a></li>
+            <li><a href="#"><img src="./src/img/instagram2.png" alt=""></a></li>
+            <li><a href="#"><img src="./src/img/whatsapp2.png" alt=""></a></li>
+        </ul>
+        <p>© 2024 Movies Land use themoviedb.org API. All rights reserved.</p>        
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="src/secret.js"></script>
+    <script src="src/main.js"></script>
+    <script src="src/navegation.js"></script>
+</body>
+</html>
