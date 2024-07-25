@@ -6,7 +6,7 @@ const axiosRequest = axios.create({
     },
     params:{
         'api_key':API_KEY,
-        "language": "es-ES"
+        "language": "es-CO"
     }
 });
 
