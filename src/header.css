@@ -241,7 +241,35 @@ header{
     border: none;
     text-decoration: none;
 }
-
+/** Skeleton del Hero **/
+.loading{
+    background: var(--color-emphasize);
+    animation: loading-skeleton infinite 1.5s;
+}
+figure.loading{
+    border-radius: 10px;
+}
+h2.loading{
+    width: 180px;
+    height: 17px;
+}
+p.loading:nth-child(2){
+    width: 180px;
+    height: 68px;
+}
+li.loading{
+    width: 45px;
+    height: 14px;
+}
+@keyframes loading-skeleton {
+    0%, 100% {
+      opacity: 100%;
+    }
+    50% {
+      opacity: 0%;
+    }
+  }
+/** fin de la seccion de skeleton Hero **/
 /** Inicio de la tendencia de peliculas o el hero **/
 .previewTrendingMovies{
     position: relative;
@@ -290,7 +318,7 @@ header{
 .previewTrendingMovies--infoMovie h2{
     color: var(--letters-color);
     margin-bottom: 8px;
-    font-size: 1.4rem;
+    font-size: 14px;
     font-family: var(--font);
 }
 .previewTrendingMovies--infoMovie img{
@@ -358,7 +386,7 @@ header{
     }
     .previewTrendingMovies--infoMovie h2{
         margin-bottom: 6px;
-        font-size: 1.6rem;
+        font-size: 16px;
     }
     .previewTrendingMovies--infoMovie p{
         font-size: 1.3rem;
@@ -373,6 +401,19 @@ header{
         display: block;
         max-height: 75px;
         overflow: hidden;
+    }
+    /** Skeleton Hero **/
+    h2.loading{
+        width: 230px;
+        height: 19px;
+    }
+    p.loading:nth-child(2){
+        width: 225px;
+        height: 75px;
+    }
+    li.loading{
+        width: 58px;
+        height: 15px;
     }
 }
 @media (min-width: 425px) {
@@ -404,7 +445,7 @@ header{
     }
     .previewTrendingMovies--infoMovie h2{
         margin-bottom: 6px;
-        font-size: 1.8rem;
+        font-size: 18px;
     }
     .previewTrendingMovies--infoMovie p{
         font-size: 1.4rem;
@@ -419,6 +460,15 @@ header{
         display: block;
         max-height: 82px;
         overflow: hidden;
+    }
+    /** skeleton hero **/
+    h2.loading{
+        width: 260px;
+        height: 22px;
+    }
+    p.loading:nth-child(2){
+        width: 260px;
+        height: 82px;
     }
 }
 @media (min-width: 510px) {
@@ -446,7 +496,7 @@ header{
     }
     .previewTrendingMovies--infoMovie h2{
         margin-bottom: 10px;
-        font-size: 2rem;
+        font-size: 20px;
     }
     .previewTrendingMovies--infoMovie p{
         font-size: 1.5rem;
@@ -461,6 +511,15 @@ header{
         display: block;
         max-height: 87px;
         overflow: hidden;
+    }
+    /** skeleton hero **/
+    h2.loading{
+        width: 320px;
+        height: 24px;
+    }
+    p.loading:nth-child(2){
+        width: 320px;
+        height: 90px;
     }
 }
 @media (min-width: 600px) {
@@ -480,10 +539,10 @@ header{
         max-width: 160px;
         height: 230px;
     }
-    .previewTrendingMovies--infoMovie h2{
+    /* .previewTrendingMovies--infoMovie h2{
         margin-bottom: 10px;
         font-size: 2rem;
-    }
+    } */
     .previewTrendingMovies--infoMovie p{
         font-size: 1.6rem;
         margin-bottom: 8px;
@@ -497,6 +556,15 @@ header{
         display: block;
         max-height: 115px;
         overflow: hidden;
+    }
+    /** skeleton hero **/
+    h2.loading{
+        width: 400px;
+        height: 24px;
+    }
+    p.loading:nth-child(2){
+        width: 400px;
+        height: 95px;
     }
 }
 
@@ -577,7 +645,7 @@ header{
     }
     .previewTrendingMovies--infoMovie h2{
         margin-bottom: 10px;
-        font-size: 2.3rem;
+        font-size: 23px;
     }
     .previewTrendingMovies--infoMovie p{
         font-size: 1.8rem;
@@ -592,6 +660,19 @@ header{
         display: block;
         max-height: none;
         overflow: none;
+    }
+    /** skeleton hero **/
+    h2.loading{
+        width: 520px;
+        height: 28px;
+    }
+    p.loading:nth-child(2){
+        width: 520px;
+        height: 95px;
+    }
+    li.loading{
+        width: 50px;
+        height: 25px;
     }
 }
 @media (min-width: 1024px) {
@@ -610,7 +691,7 @@ header{
     }
     .previewTrendingMovies--infoMovie h2{
         margin-bottom: 10px;
-        font-size: 2.6rem;
+        font-size: 26px;
     }
     .previewTrendingMovies--infoMovie p{
         font-size: 2rem;
@@ -620,6 +701,19 @@ header{
         gap: 9px;
         font-weight: 500;
         font-size: 2rem;
+    }
+    /** skeleton hero **/
+    h2.loading{
+        width: 720px;
+        height: 32px;
+    }
+    p.loading:nth-child(2){
+        width: 720px;
+        height: 150px;
+    }
+    li.loading{
+        width: 65px;
+        height: 35px;
     }
 }
 @media (min-width: 1100px) {

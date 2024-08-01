@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Movies Land is a web page with a list of movies that you can search and save in favorites">
     <title>Movies Land</title>
     <link rel="stylesheet" href="src/local-fonts.css">
     <link rel="stylesheet" href="src/header.css">
@@ -44,7 +45,7 @@
             <svg class="searchIcon" width="34px" height="34px" viewBox="-2.4 -2.4 28.80 28.80" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><g clip-path="url(#clip0_15_152)"><circle cx="10.5" cy="10.5" r="6.5" stroke="#6FFFE9" stroke-linejoin="round"></circle><path d="M19.6464 20.3536C19.8417 20.5488 20.1583 20.5488 20.3536 20.3536C20.5488 20.1583 20.5488 19.8417 20.3536 19.6464L19.6464 20.3536ZM20.3536 19.6464L15.3536 14.6464L14.6464 15.3536L19.6464 20.3536L20.3536 19.6464Z" fill="#6FFFE9"></path></g><defs><clipPath id="clip0_15_152"><rect width="24" height="24" fill="none"></rect></clipPath></defs></g></svg>              
             <div class="formContainer inactive">
                 <form class="form">
-                    <button>
+                    <button aria-label="search">
                         <svg width="17" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="search">
                             <path d="M7.667 12.667A5.333 5.333 0 107.667 2a5.333 5.333 0 000 10.667zM14.334 14l-2.9-2.9" stroke="currentColor" stroke-width="1.333" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
@@ -60,25 +61,20 @@
         </nav>
     </header>
     <main>
-        <a class="btnReturn inactive"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512"><path fill="none" stroke="#6FFFE9" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M328 112L184 256l144 144"/></svg></a>
+        <button class="btnReturn inactive"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512"><path fill="none" stroke="#6FFFE9" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M328 112L184 256l144 144"/></svg></button>
         <section class="previewTrendingMovies changePreviewTrendingMovies">
-            <!-- <div class="slideContainer">
-                <article class="backgroundImageMovie" id="slide1">
-                    <figure><img src="https://image.tmdb.org/t/p/w300/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg" alt=""></figure>
-                    <div class="previewTrendingMovies--infoMovie">
-                        <h2>StarWars Jedis Comming</h2>
-                        <p><img src="./src/img/star-regular.png" alt=""> 7.3</p>
-                        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quasi dolorum illo, quidem commodi maiores dicta quaerat quae inventore quam dolores beatae perspiciatis ipsam veniam eaque assumenda alias! Quibusdam, nobis explicabo!</p>
-                        <ul>
-                            <li>accion</li>
-                            <li>aventura</li>
-                            <li>comedia</li>
-                        </ul>
-                    </div>
-                </article>
-                <a href="#slide3"><</a>
-                <a href="#slide2">></a>
-            </div> -->
+            <!--<article class="backgroundImageMovie">
+                <figure class="loading"></figure>
+                <div class="previewTrendingMovies--infoMovie">
+                    <h2 class="loading"></h2>
+                    <p class="loading one"><!--<img>--></p>
+                    <!--<p class="loading"></p>
+                    <ul>
+                        <li class="loading"></li>
+                        <li class="loading"></li>
+                    </ul>
+                </div>
+            </article>-->
         </section>
         <section class="movies changeMovies">
             <!-- <article class="categoryMovies">
@@ -105,9 +101,9 @@
     <footer>
         <h3>Movies Land</h3>
         <ul>
-            <li><a href="#"><img src="./src/img/facebook.png" alt=""></a></li>
-            <li><a href="#"><img src="./src/img/instagram2.png" alt=""></a></li>
-            <li><a href="#"><img src="./src/img/whatsapp2.png" alt=""></a></li>
+            <li><a href="https://www.themoviedb.org"><img src="./src/img/facebook.png" alt="boton de facebook"></a></li>
+            <li><a href="https://www.themoviedb.org"><img src="./src/img/instagram2.png" alt="boton de instagram"></a></li>
+            <li><a href="https://www.themoviedb.org"><img src="./src/img/whatsapp2.png" alt="boton de whatsapp"></a></li>
         </ul>
         <p>© 2024 Movies Land use themoviedb.org API. All rights reserved.</p>        
     </footer>
