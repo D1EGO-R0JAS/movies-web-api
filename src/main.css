@@ -16,6 +16,13 @@ html{
     --color-Black: #0B132B;
     --font: "Roboto", sans-serif;
 }
+div.loading{
+    border-radius: 10px;
+}
+.categoryMovies h2.loading{
+    width: 60px;
+    height: 18px;
+}
 .movies{
     width: 100%;
     height: auto;
@@ -23,14 +30,14 @@ html{
 .categoryMovies{
     padding: 20px 10px 0 10px;
     width: 100%;
-    margin-bottom: 20px;
+    margin: 40px 0;
 }
 .categoryMovies h2{
     text-align: start;
     font-family: var(--font);
     color: var(--letters-color);
     font-size: 2rem;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     cursor: pointer;
 }
 .btnPrev , .btnNext{
@@ -44,6 +51,10 @@ html{
     border: none;
     cursor: pointer;
 }
+.btnMore{
+    position: absolute;
+    left: 200px;
+}
 .btnPrev{
     left:  10px;
 }
@@ -54,7 +65,7 @@ html{
     display: grid;
     grid-template-columns: repeat(20,150px);
     grid-template-rows: repeat(1, 225px);
-    margin: 35px 10px;
+    margin: 40px 10px;
     gap: 20px;
     overflow-x: auto;
     overflow-y: hidden;
@@ -169,7 +180,7 @@ html{
     border-radius: 10px;   
 }
 .movieGenreInfo h3{
-    font-size: 1.4rem;
+    font-size: 14px;
     color: var(--icons-color);
     margin-bottom: 5px;
     cursor: pointer;
@@ -200,6 +211,7 @@ html{
 }
 /** fin de estilos de la pagina de solo un genero **/
 footer{
+    opacity: 0;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -242,5 +254,13 @@ footer p{
         color: var(--letters-color);
         font-size: 3rem;
         margin-bottom: 10px;
+    }
+}
+@media (min-width: 1024px) {
+    .movieGenreInfo h3{
+        font-size: 16px;
+        color: var(--icons-color);
+        margin-bottom: 5px;
+        cursor: pointer;
     }
 }

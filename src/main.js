@@ -1,3 +1,9 @@
+/** Configuracion de Variables globales, nodos y axios **/
+
+/* El siguiente código está configurando una instancia de Axios para realizar peticiones HTTP a
+https://api.themoviedb.org/3'. Incluye la URL base, cabeceras que especifican el tipo de contenido y
+parámetros como la clave API y el idioma ('es-CO'). Esta configuración permite un uso más sencillo y limpio
+y más limpio de Axios para realizar peticiones al punto final de la API especificado. */
 const API = 'https://api.themoviedb.org/3';
 const axiosRequest = axios.create({
     baseURL: 'https://api.themoviedb.org/3',
@@ -9,8 +15,44 @@ const axiosRequest = axios.create({
         "language": "es-CO"
     }
 });
+// Variable de 
+const sectionPreviewTrendingMovies = document.querySelector('.changePreviewTrendingMovies')
+// variable del worker
+let worker = new Worker('./src/worker.js')
+let counterRequestId = 0
+function sendMessage(message) {
+    return new Promise((resolve, reject) => {
+        const requestId = counterRequestId++
 
-let generos; 
+        function handleMessage(event) {
+            const { id, data, error} = event.data;
+            if (id === requestId) {
+                worker.removeEventListener('message', handleMessage);
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(data);
+                }
+            }
+        }
+        worker.addEventListener('message', handleMessage);
+        worker.postMessage({ id: requestId,  ...message});
+    })
+}
+async function getGenres() {
+    const storageGenres = localStorage.getItem('genres');
+    if (storageGenres) {
+        generos = JSON.parse(storageGenres);
+        console.log('si hay storage');
+        return generos;
+    }else{
+        console.log('no hay storage y entro');
+        const { data } = await axiosRequest('/genre/movie/list')
+        generos = data.genres;
+        localStorage.setItem('genres', JSON.stringify(generos));
+        return generos;
+    }
+}
 
 /** Codigo de la interaccion del menu Hamburgesa movil*/
 const hambuegerMenu = document.querySelector('.hamburger input')
@@ -77,55 +119,59 @@ searchIcon.addEventListener('click',()=>{
 
 /** Creacion del carrusel de las peliculas trending **/
 
-function getRandomNumber(cuantity ,limit, arr) {
-    let numbers = new Set();
-    const info = [];
-    while (numbers.size < cuantity) {
-        const randomNumber = Math.floor(Math.random()*limit)
-        numbers.add(randomNumber);
-    }
-    numbers = Array.from(numbers)
-    for (let i = 0; i < numbers.length; i++) {
-        const element = numbers[i];
-        info.push(arr[element])
-    }
-    return info
-}
+// function getRandomNumber(cuantity ,limit, arr) {
+//     let numbers = new Set();
+//     const info = [];
+//     while (numbers.size < cuantity) {
+//         const randomNumber = Math.floor(Math.random()*limit)
+//         numbers.add(randomNumber);
+//     }
+//     numbers = Array.from(numbers)
+//     for (let i = 0; i < numbers.length; i++) {
+//         const element = numbers[i];
+//         info.push(arr[element])
+//     }
+//     return info
+// }
 /** Obtencion de los generos **/
-async function getGenres(arr) {
-    if (arr != undefined) {
-        const { data } = await axiosRequest('/genre/movie/list')
-        const res = data.genres;
-        generos = res;
-        const newArr = [];
-        for (let i = 0; i < arr.length; i++) {
-            const e = arr[i];
-            for (let j = 0; j < res.length; j++) {
-                const f = res[j];
-                if (e === f.id) {
-                    newArr.push(f.name)
-                }
-            }        
-        }
-        return newArr
-    }else{
-        console.log('entro a los generos sin pedir el array');
-        const { data } = await axiosRequest('/genre/movie/list')
-        const res = data.genres;
-        generos = res;
-        console.log(generos);
-    }
+// async function getGenres(arr) {
+//     if (arr != undefined) {
+//         const { data } = await axiosRequest('/genre/movie/list')
+//         const res = data.genres;
+//         generos = res;
+//         const newArr = [];
+//         for (let i = 0; i < arr.length; i++) {
+//             const e = arr[i];
+//             for (let j = 0; j < res.length; j++) {
+//                 const f = res[j];
+//                 if (e === f.id) {
+//                     newArr.push(f.name)
+//                 }
+//             }        
+//         }
+//         return newArr
+//     }else{
+//         console.log('entro a los generos sin pedir el array');
+//         const { data } = await axiosRequest('/genre/movie/list')
+//         const res = data.genres;
+//         generos = res;
+//         console.log(generos);
+//     }
     
-}
-
-const sectionPreviewTrendingMovies = document.querySelector('.changePreviewTrendingMovies')
+// }
 
 /** fin de la funcion de obtener los generos **/
 
 async function getTrendingMovies() {
-    sectionPreviewTrendingMovies.innerHTML = ''
+    const genresGetTrending = await getGenres();  
+    console.log(genresGetTrending);
     const { data } = await axiosRequest('/trending/movie/day')
-    const movies = getRandomNumber(6, data.results.length, data.results)
+    const workerData1 = {
+        cuantity: 6,
+        limit: data.results.length,
+        arr: data.results
+    }
+    const movies = await sendMessage({type: 'getRandomNumber', data: workerData1});
     const btnAnterior = document.createElement('button')
     btnAnterior.classList.add('btn', 'anterior')
     const btnSiguiente = document.createElement('button')
@@ -134,7 +180,7 @@ async function getTrendingMovies() {
     btnSiguiente.innerText = '>';
     btnAnterior.onclick = prevSlide;
     btnSiguiente.onclick = nextSlide;
-    sectionPreviewTrendingMovies.append(btnAnterior, btnSiguiente)
+    
     const divContainer = document.createElement('div')
     divContainer.classList.add('slideContainer')
     movies.forEach((movie, i)=>{
@@ -146,6 +192,7 @@ async function getTrendingMovies() {
         const figurePoster = document.createElement('figure')
         const imgPoster = document.createElement('img')
         imgPoster.setAttribute('src',`https://image.tmdb.org/t/p/w300${movie.poster_path}`)
+        imgPoster.setAttribute('alt',`${movie.title}`)
         const divInfoMovie = document.createElement('div')
         divInfoMovie.classList.add('previewTrendingMovies--infoMovie')
         const title = document.createElement('h2')
@@ -154,19 +201,28 @@ async function getTrendingMovies() {
         const calification = document.createElement('p')
         const imgCalification = document.createElement('img')
         imgCalification.setAttribute('src','./src/img/star-regular.png')
+        imgCalification.setAttribute('alt','Calification of movie')
         const calificationText = document.createTextNode(`${movie.vote_average.toFixed(1)}`)
         const textMovie = document.createElement('p')
         const innerTextMovie = document.createTextNode(`${movie.overview}`)
         const ul = document.createElement('ul')
         let li1 = document.createElement('li')
         let li2 = document.createElement('li')
-        let li1Text, li2Text; 
-        const genresMovie = getGenres(movie.genre_ids).then((data)=>{
-            li1Text = document.createTextNode(`${data[0]}`)
-            li2Text = document.createTextNode(`${data[1]}`)
-            li2.appendChild(li2Text)
-            li1.appendChild(li1Text)
-        })        
+        let li1Text, li2Text;
+        sendMessage({type: 'identifyGenres', data: {arrG: movie.genre_ids, arrG2: genresGetTrending}}).then((infoG) => {
+            if (infoG.length > 0) {
+                li1Text = document.createTextNode(`${infoG[0] || ''}`);
+                li2Text = document.createTextNode(`${infoG[1] || ''}`);
+                li2.appendChild(li2Text);
+                li1.appendChild(li1Text);
+            }
+        }); 
+        // const genresMovie = sendMessage({type: 'identifyGenres', data: movie.genre_ids}).then((infoG)=>{
+        //     li1Text = document.createTextNode(`${infoG[0]}`)
+        //     li2Text = document.createTextNode(`${infoG[1]}`)
+        //     li2.appendChild(li2Text)
+        //     li1.appendChild(li1Text)
+        // })        
         ul.append(li1, li2)
         textMovie.appendChild(innerTextMovie)
         calification.append(imgCalification, calificationText)
@@ -175,93 +231,338 @@ async function getTrendingMovies() {
         article.append(figurePoster, divInfoMovie)
         divContainer.appendChild(article)
     })
+    sectionPreviewTrendingMovies.innerHTML = ''
+    sectionPreviewTrendingMovies.append(btnAnterior, btnSiguiente)
     sectionPreviewTrendingMovies.appendChild(divContainer)
 }
 
 /** Creacion de la seccion de peliculas por genero **/
-const movies = document.querySelector('.movies')
-async function getMovies() {
-    try{
-        const { data } = await axiosRequest('/genre/movie/list')
-        const dataGenres = data.genres;
+const movies = document.querySelector('.movies');
 
-        const mapeo = dataGenres.map(async(genre)=>{
-            const { data: result } = await axiosRequest('/discover/movie',{
-                params:{
-                    with_genres: genre.id
+async function createMoviesInMain(moviesMain,moviesMain1, moviesMain2, genero1, genero2,{clean = false, lazyLoading = true, inicio = false} = {}) {
+    if (clean) {
+        const article = document.createElement('article');
+        article.classList.add('categoryMovies');
+        const h2 = document.createElement('h2');
+        h2.addEventListener('click', () => {
+            const content = h2.innerText;
+            detectGenreOrType(content);
+        });
+        const h2Text = document.createTextNode(`${genero}`);
+        h2.appendChild(h2Text);
+        article.appendChild(h2);
+        const btnPrev = document.createElement('button');
+        const btnNext = document.createElement('button');
+        btnPrev.classList.add('btnPrev');
+        btnNext.classList.add('btnNext');
+        btnPrev.innerHTML = '<';
+        btnNext.innerHTML = '>';
+        btnNext.onclick = (event) => scrollRight(event);
+        btnPrev.onclick = (event) => left(event);
+        article.append(btnPrev, btnNext);
+        const div = document.createElement('div');
+        div.classList.add('categoryMovie--Container');
+        moviesMain.results.forEach((movie) => {
+            const divMovie = document.createElement('div');
+            divMovie.classList.add('posterMovieImage');
+            divMovie.setAttribute('id-movie', `${movie.id}`);
+            const img = document.createElement('img');
+            img.setAttribute('src', `https://image.tmdb.org/t/p/w300${movie.poster_path}`);
+            img.setAttribute('alt', `${movie.title}`);
+            divMovie.appendChild(img);
+            const divInfo = document.createElement('div');
+            divInfo.classList.add('infoMovie');
+            const h3 = document.createElement('h3');
+            const h3Text = document.createTextNode(`${movie.title}`);
+            h3.appendChild(h3Text);
+            const p = document.createElement('p');
+            const imgStar = document.createElement('img');
+            imgStar.setAttribute('src', './src/img/star-regular.png');
+            const pText = document.createTextNode(`${movie.vote_average.toFixed(1)}`);
+            p.appendChild(imgStar);
+            p.appendChild(pText);
+            const p2 = document.createElement('p');
+            const pText2 = document.createTextNode(`${movie.overview}`);
+            p2.appendChild(pText2);
+            const ul = document.createElement('ul');
+            const li1 = document.createElement('li');
+            const li2 = document.createElement('li');
+            sendMessage({ type: 'identifyGenres', data: { arrG: movie.genre_ids, arrG2: generos } }).then((infoG) => {
+                if (infoG && infoG.length > 0) {
+                    const li1Text = document.createTextNode(`${infoG[0] || ''}`);
+                    const li2Text = document.createTextNode(`${infoG[1] || ''}`);
+                    li1.appendChild(li1Text);
+                    li2.appendChild(li2Text);
+                    ul.append(li1, li2);
                 }
-            })
-            return { genre: genre.name, movies: result.results }
-        })
-
-        const responsePromise = await Promise.all(mapeo)         
-        movies.innerHTML = ''
-        responsePromise.forEach((genre)=>{
-            const article = document.createElement('article')
-            article.classList.add('categoryMovies')
-            const h2 = document.createElement('h2')
-            h2.addEventListener('click',()=>{
-                const content = h2.innerText
-                detectGenreOrType(content)
-            })
-            const h2Text = document.createTextNode(`${genre.genre}`)
-            h2.appendChild(h2Text)
-            article.appendChild(h2)
-            const btnPrev = document.createElement('button')
-            const btnNext = document.createElement('button')
-            btnPrev.classList.add('btnPrev')
-            btnNext.classList.add('btnNext')
+            }).catch(error => console.log('Error al identificar géneros:', error));
+            divInfo.append(h3, p, p2, ul);
+            divMovie.appendChild(divInfo);
+            div.appendChild(divMovie);
+        });
+        movies.innerHTML = '';
+        article.appendChild(div);
+        movies.appendChild(article);
+    }else if(inicio){       
+        console.log(moviesMain1);
+        console.log(genero1); 
+        movies.innerHTML = '';
+        genero1.forEach((gener, i)=>{
+            const article = document.createElement('article');
+            article.classList.add('categoryMovies');
+            const h2 = document.createElement('h2');
+            h2.addEventListener('click', () => {
+                const content = h2.innerText;
+                detectGenreOrType(content);
+            });
+            const h2Text = document.createTextNode(`${genero1[i].name}`);
+            h2.appendChild(h2Text);
+            article.appendChild(h2);
+            const btnPrev = document.createElement('button');
+            const btnNext = document.createElement('button');
+            btnPrev.classList.add('btnPrev');
+            btnNext.classList.add('btnNext');
             btnPrev.innerHTML = '<';
             btnNext.innerHTML = '>';
-            btnNext.onclick = () => scrollRight(event)
-            btnPrev.onclick = () => left(event)
-            article.append(btnPrev, btnNext)
-            const div = document.createElement('div')
-            div.classList.add('categoryMovie--Container')
-            genre.movies.forEach((movie)=>{
-                const divMovie = document.createElement('div')
-                divMovie.classList.add('posterMovieImage')
-                divMovie.setAttribute('id-movie',`${movie.id}`)
-                const img = document.createElement('img')
-                img.setAttribute('src',`https://image.tmdb.org/t/p/w300${movie.poster_path}`)
-                img.setAttribute('alt',`${movie.title}`)
-                divMovie.appendChild(img)
-                const divInfo = document.createElement('div')
-                divInfo.classList.add('infoMovie')
-                const h3 = document.createElement('h3')
-                const h3Text = document.createTextNode(`${movie.title}`)
-                h3.appendChild(h3Text)
-                const p = document.createElement('p')
-                const imgStar = document.createElement('img')
-                imgStar.setAttribute('src','./src/img/star-regular.png')
-                const pText = document.createTextNode(`${movie.vote_average.toFixed(1)}`)
-                p.appendChild(imgStar)
-                p.appendChild(pText)
-                const p2 = document.createElement('p')
-                const pText2 = document.createTextNode(`${movie.overview}`)
-                p2.appendChild(pText2)
-                const ul = document.createElement('ul')
-                const li1 = document.createElement('li')
-                const li2 = document.createElement('li')
-                let li1Text, li2Text;
-                getGenres(movie.genre_ids).then((data)=>{
-                    li1Text = document.createTextNode(`${data[0]}`)
-                    li2Text = document.createTextNode(`${data[1]}`)
-                    li2.appendChild(li2Text)
-                    li1.appendChild(li1Text)
-                    ul.append(li1, li2)
-                })
-                divInfo.append(h3, p, p2, ul)
-                divMovie.appendChild(divInfo)
-                div.appendChild(divMovie)
-            })
-            article.appendChild(div)
-            movies.appendChild(article)
+            btnNext.onclick = (event) => scrollRight(event);
+            btnPrev.onclick = (event) => left(event);
+            article.append(btnPrev, btnNext);
+            const div = document.createElement('div');
+            div.classList.add('categoryMovie--Container');
+            moviesMain1.forEach((movie) => {
+                const divMovie = document.createElement('div');
+                divMovie.classList.add('posterMovieImage');
+                divMovie.setAttribute('id-movie', `${movie.id}`);
+                const img = document.createElement('img');
+                img.setAttribute('src', `https://image.tmdb.org/t/p/w300${movie.poster_path}`);
+                img.setAttribute('alt', `${movie.title}`);
+                divMovie.appendChild(img);
+                const divInfo = document.createElement('div');
+                divInfo.classList.add('infoMovie');
+                const h3 = document.createElement('h3');
+                const h3Text = document.createTextNode(`${movie.title}`);
+                h3.appendChild(h3Text);
+                const p = document.createElement('p');
+                const imgStar = document.createElement('img');
+                imgStar.setAttribute('src', './src/img/star-regular.png');
+                const pText = document.createTextNode(`${movie.vote_average.toFixed(1)}`);
+                p.appendChild(imgStar);
+                p.appendChild(pText);
+                const p2 = document.createElement('p');
+                const pText2 = document.createTextNode(`${movie.overview}`);
+                p2.appendChild(pText2);
+                const ul = document.createElement('ul');
+                const li1 = document.createElement('li');
+                const li2 = document.createElement('li');
+                sendMessage({ type: 'identifyGenres', data: { arrG: movie.genre_ids, arrG2: generos } }).then((infoG) => {
+                    if (infoG && infoG.length > 0) {
+                        const li1Text = document.createTextNode(`${infoG[0] || ''}`);
+                        const li2Text = document.createTextNode(`${infoG[1] || ''}`);
+                        li1.appendChild(li1Text);
+                        li2.appendChild(li2Text);
+                        ul.append(li1, li2);
+                    }
+                }).catch(error => console.log('Error al identificar géneros:', error));
+                divInfo.append(h3, p, p2, ul);
+                divMovie.appendChild(divInfo);
+                div.appendChild(divMovie);
+            });
+            article.appendChild(div);
+            movies.appendChild(article);
         })
-        return responsePromise
+        genero2.forEach((gener, i)=>{
+            const article = document.createElement('article');
+            article.classList.add('categoryMovies');
+            const h2 = document.createElement('h2');
+            h2.addEventListener('click', () => {
+                const content = h2.innerText;
+                detectGenreOrType(content);
+            });
+            const h2Text = document.createTextNode(`${genero2[i].name}`);
+            h2.appendChild(h2Text);
+            article.appendChild(h2);
+            const btnPrev = document.createElement('button');
+            const btnNext = document.createElement('button');
+            btnPrev.classList.add('btnPrev');
+            btnNext.classList.add('btnNext');
+            btnPrev.innerHTML = '<';
+            btnNext.innerHTML = '>';
+            btnNext.onclick = (event) => scrollRight(event);
+            btnPrev.onclick = (event) => left(event);
+            article.append(btnPrev, btnNext);
+            const div = document.createElement('div');
+            div.classList.add('categoryMovie--Container');
+            moviesMain2.forEach((movie) => {
+                const divMovie = document.createElement('div');
+                divMovie.classList.add('posterMovieImage');
+                divMovie.setAttribute('id-movie', `${movie.id}`);
+                const img = document.createElement('img');
+                img.setAttribute('src', `https://image.tmdb.org/t/p/w300${movie.poster_path}`);
+                img.setAttribute('alt', `${movie.title}`);
+                divMovie.appendChild(img);
+                const divInfo = document.createElement('div');
+                divInfo.classList.add('infoMovie');
+                const h3 = document.createElement('h3');
+                const h3Text = document.createTextNode(`${movie.title}`);
+                h3.appendChild(h3Text);
+                const p = document.createElement('p');
+                const imgStar = document.createElement('img');
+                imgStar.setAttribute('src', './src/img/star-regular.png');
+                const pText = document.createTextNode(`${movie.vote_average.toFixed(1)}`);
+                p.appendChild(imgStar);
+                p.appendChild(pText);
+                const p2 = document.createElement('p');
+                const pText2 = document.createTextNode(`${movie.overview}`);
+                p2.appendChild(pText2);
+                const ul = document.createElement('ul');
+                const li1 = document.createElement('li');
+                const li2 = document.createElement('li');
+                sendMessage({ type: 'identifyGenres', data: { arrG: movie.genre_ids, arrG2: generos } }).then((infoG) => {
+                    if (infoG && infoG.length > 0) {
+                        const li1Text = document.createTextNode(`${infoG[0] || ''}`);
+                        const li2Text = document.createTextNode(`${infoG[1] || ''}`);
+                        li1.appendChild(li1Text);
+                        li2.appendChild(li2Text);
+                        ul.append(li1, li2);
+                    }
+                }).catch(error => console.log('Error al identificar géneros:', error));
+                divInfo.append(h3, p, p2, ul);
+                divMovie.appendChild(divInfo);
+                div.appendChild(divMovie);
+            });
+            article.appendChild(div);
+            movies.appendChild(article);
+        })
+    }else{
+        // const btnmore = document.createElement('button');
+        // btnmore.classList.add('btnMore');
+        // btnmore.innerText = 'Ver mas';
+        // btnmore.addEventListener('click', () => {
+        //     iGenres ++;
+        //     getMovies(iGenres, {clean: false});
+        // })
+        const article = document.createElement('article');
+        article.classList.add('categoryMovies');
+        const h2 = document.createElement('h2');
+        h2.addEventListener('click', () => {
+            const content = h2.innerText;
+            detectGenreOrType(content);
+        });
+        const h2Text = document.createTextNode(`${genero1}`);
+        h2.appendChild(h2Text);
+        article.appendChild(h2);
+        const btnPrev = document.createElement('button');
+        const btnNext = document.createElement('button');
+        btnPrev.classList.add('btnPrev');
+        btnNext.classList.add('btnNext');
+        btnPrev.innerHTML = '<';
+        btnNext.innerHTML = '>';
+        btnNext.onclick = (event) => scrollRight(event);
+        btnPrev.onclick = (event) => left(event);
+        article.append(btnPrev, btnNext);
+        const div = document.createElement('div');
+        div.classList.add('categoryMovie--Container');
+        moviesMain.results.forEach((movie) => {
+            const divMovie = document.createElement('div');
+            divMovie.classList.add('posterMovieImage');
+            divMovie.setAttribute('id-movie', `${movie.id}`);
+            const img = document.createElement('img');
+            img.setAttribute('src', `https://image.tmdb.org/t/p/w300${movie.poster_path}`);
+            img.setAttribute('alt', `${movie.title}`);
+            divMovie.appendChild(img);
+            const divInfo = document.createElement('div');
+            divInfo.classList.add('infoMovie');
+            const h3 = document.createElement('h3');
+            const h3Text = document.createTextNode(`${movie.title}`);
+            h3.appendChild(h3Text);
+            const p = document.createElement('p');
+            const imgStar = document.createElement('img');
+            imgStar.setAttribute('src', './src/img/star-regular.png');
+            const pText = document.createTextNode(`${movie.vote_average.toFixed(1)}`);
+            p.appendChild(imgStar);
+            p.appendChild(pText);
+            const p2 = document.createElement('p');
+            const pText2 = document.createTextNode(`${movie.overview}`);
+            p2.appendChild(pText2);
+            const ul = document.createElement('ul');
+            const li1 = document.createElement('li');
+            const li2 = document.createElement('li');
+            sendMessage({ type: 'identifyGenres', data: { arrG: movie.genre_ids, arrG2: generos } }).then((infoG) => {
+                if (infoG && infoG.length > 0) {
+                    const li1Text = document.createTextNode(`${infoG[0] || ''}`);
+                    const li2Text = document.createTextNode(`${infoG[1] || ''}`);
+                    li1.appendChild(li1Text);
+                    li2.appendChild(li2Text);
+                    ul.append(li1, li2);
+                }
+            }).catch(error => console.log('Error al identificar géneros:', error));
+            divInfo.append(h3, p, p2, ul);
+            divMovie.appendChild(divInfo);
+            div.appendChild(divMovie);
+        });
+        article.appendChild(div);
+        movies.appendChild(article);
     }
-    catch(error){
+    
+}
+async function getMovies() {
+    try {
+        const generos = await getGenres();
+        const indexGenre = generos[0]
+        const indexGenre2 = generos[1]
+        const { data: result } = await axiosRequest('/discover/movie', {
+            params: {
+                with_genres: indexGenre.id
+            }
+        });
+        const { data: result2 } = await axiosRequest('/discover/movie', {
+            params: {
+                with_genres: indexGenre2.id
+            }
+        })
+        const genero = new Array(generos[0]) 
+        const genero2 = new Array(generos[1])
+        createMoviesInMain(undefined, result.results, result2.results, genero, genero2,{ clean: false, lazyLoading: true, inicio:true});        
+        // const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+        // const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight - 10);
+        // if(scrollIsBottom && i < maxGenres){
+
+        // }else if(!scrollIsBottom){
+        //     const generos = await getGenres();
+        //     console.log(maxGenres);
+        //     const indexGenre = generos[0]
+        //     console.log(indexGenre);
+        //     const { data: result } = await axiosRequest('/discover/movie', {
+        //         params: {
+        //             with_genres: indexGenre.id
+        //         }
+        //     });
+        //     createMoviesInMain( result, { clean: false, lazyLoading: true });
+        // }
+    } catch (error) {
         console.log(error);
+    }
+}
+const footer = document.querySelector('footer');
+async function getMoviesPaginatedInMain(){
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight-1);
+    console.log(iGenres);
+    if(scrollIsBottom && iGenres < maxGenres){
+        const generos = await getGenres();
+        if (iGenres < maxGenres){
+            const indexGenre = generos[iGenres]
+            const { data: result } = await axiosRequest('/discover/movie', {
+                params: {
+                with_genres: indexGenre.id
+                }
+            });
+            createMoviesInMain( result, undefined, undefined, indexGenre.name, undefined,{ clean: false, lazyLoading: true, inicio: false });
+            iGenres++;
+        }
+        if (iGenres>= maxGenres){
+            footer.style.opacity = '1';                
+        }
     }
 }
 
@@ -374,6 +675,8 @@ function detectGenreOrType(value) {
 
 function drawMoviesGenresAndType(arr, genero) {
     console.log('esta dibujando');
+    const getGenresForDraw = JSON.parse(localStorage.getItem('genres'))
+    console.log(getGenresForDraw);
     const moviesGenreContainer = document.createElement('article')
     const moviesGenre = document.querySelector('.moviesGenre')
     sectionMovies.innerHTML = ''
@@ -408,13 +711,22 @@ function drawMoviesGenresAndType(arr, genero) {
         const li1 = document.createElement('li')
         const li2 = document.createElement('li')
         let li1Text, li2Text;
-        getGenres(movie.genre_ids).then((data)=>{
-            li1Text = document.createTextNode(`${data[0]}`)
-            li2Text = document.createTextNode(`${data[1]}`)
-            li2.appendChild(li2Text)
-            li1.appendChild(li1Text)
-            ul.append(li1, li2)
-        })
+        sendMessage({type: 'identifyGenres', data: {arrG: movie.genre_ids, arrG2: getGenresForDraw}}).then((infoG =>{
+            if (infoG.length > 0) {
+                li1Text = document.createTextNode(`${infoG[0] || ''}`);
+                li2Text = document.createTextNode(`${infoG[1] || ''}`);
+                li2.appendChild(li2Text);
+                li1.appendChild(li1Text);
+                ul.append(li1, li2)
+            }
+        }))
+        // getGenres(movie.genre_ids).then((data)=>{
+        //     li1Text = document.createTextNode(`${data[0]}`)
+        //     li2Text = document.createTextNode(`${data[1]}`)
+        //     li2.appendChild(li2Text)
+        //     li1.appendChild(li1Text)
+        //     ul.append(li1, li2)
+        // })
         movieGenreInfo.append(h3, p, p2, ul)
         divMovie.append(movieGenreInfo)
         moviesGenreContainer.append(divMovie)
@@ -522,4 +834,40 @@ async function drawSearchMovie(value){
         }
     })
     drawMoviesGenresAndType(moviesSearch.results, value)
+}
+
+function skeleton(){
+    sectionPreviewTrendingMovies.innerHTML = `
+        <article class="backgroundImageMovie">
+                <figure class="loading"></figure>
+                <div class="previewTrendingMovies--infoMovie">
+                    <h2 class="loading"></h2>
+                    <p class="loading one"><!--<img>--></p>
+                    <p class="loading"></p>
+                    <ul>
+                        <li class="loading"></li>
+                        <li class="loading"></li>
+                    </ul>
+                </div>
+            </article>
+    `;
+    movies.innerHTML = `
+            <article class="categoryMovies">
+                <h2 class="loading"></h2>
+                <div class="categoryMovie--Container">
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    <div class="loading"></div>
+                    </div>
+            </article>
+    `;
 }
