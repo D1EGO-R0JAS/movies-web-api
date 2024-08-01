@@ -546,7 +546,7 @@ async function getMovies() {
 const footer = document.querySelector('footer');
 async function getMoviesPaginatedInMain(){
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight-1);
+    const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight-15);
     console.log(iGenres);
     if(scrollIsBottom && iGenres < maxGenres){
         const generos = await getGenres();
