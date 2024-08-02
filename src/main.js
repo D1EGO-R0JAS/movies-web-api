@@ -546,8 +546,7 @@ async function getMovies() {
 const footer = document.querySelector('footer');
 async function getMoviesPaginatedInMain(){
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight-15);
-    console.log(iGenres);
+    const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight-50);
     if(scrollIsBottom && iGenres < maxGenres){
         const generos = await getGenres();
         if (iGenres < maxGenres){
@@ -557,8 +556,11 @@ async function getMoviesPaginatedInMain(){
                 with_genres: indexGenre.id
                 }
             });
+            console.log(result);
+            ++iGenres;
+            console.log('por aqui paso');
+            console.log(iGenres);
             createMoviesInMain( result, undefined, undefined, indexGenre.name, undefined,{ clean: false, lazyLoading: true, inicio: false });
-            iGenres++;
         }
         if (iGenres>= maxGenres){
             footer.style.opacity = '1';                
