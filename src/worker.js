@@ -1,3 +1,5 @@
+"use strict";
+
 // Manejar mensajes del hilo principal
 self.onmessage = async function(event) {
     const { id, type, data} = event.data;

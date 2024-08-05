@@ -23,6 +23,35 @@ div.loading{
     width: 60px;
     height: 18px;
 }
+.favMovies{
+    width: 100%;
+    height: auto;
+    margin: 40px 0 0 0;
+    padding: 20px 10px 0 10px;
+}
+.favMovies h2{
+    text-align: start;
+    font-family: var(--font);
+    color: var(--letters-color);
+    font-size: 2rem;
+    margin-bottom: 10px;
+    cursor: pointer;
+    width: 250px;
+}
+.favMovies--container{
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(auto-fit, 150px);
+    grid-auto-flow: column;
+    height: 225px;
+    margin: 40px 10px;
+    gap: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+}
 .movies{
     width: 100%;
     height: auto;
@@ -30,7 +59,7 @@ div.loading{
 .categoryMovies{
     padding: 20px 10px 0 10px;
     width: 100%;
-    margin: 40px 0;
+    margin: 20px 0;
 }
 .categoryMovies h2{
     text-align: start;
@@ -39,6 +68,7 @@ div.loading{
     font-size: 2rem;
     margin-bottom: 10px;
     cursor: pointer;
+    width: 250px;
 }
 .btnPrev , .btnNext{
     position: absolute;
@@ -75,9 +105,24 @@ div.loading{
 }
 .posterMovieImage{
     position: relative;
+    width: 150px;
 }
 .infoMovie{
     display: none;
+}
+.like::before{
+    content: '💙';
+}
+.like{
+    position: absolute;
+    top: 10px;
+    right: 5px;
+    font-size: 1.2rem;
+    background-color: var(--letters-color);
+    border-radius: 50%;
+    border: none;
+    padding: 2.2px;
+    cursor: pointer;
 }
 .posterMovieImage img:nth-last-child(2){
     width: 100%;
@@ -111,7 +156,7 @@ div.loading{
 }
 .infoMovie p:nth-last-child(2){
     display: block;
-    max-height: 77px;
+    max-height: 7.1rem;
     overflow: hidden;
     margin-bottom: 10px;
     font-weight: 300;
@@ -192,7 +237,7 @@ div.loading{
 }
 .movieGenreInfo p:nth-last-child(2){
     display: block;
-    max-height: 77px;
+    max-height: 7.1rem;
     overflow: hidden;
     margin-bottom: 10px;
     font-weight: 300;
@@ -211,8 +256,7 @@ div.loading{
 }
 /** fin de estilos de la pagina de solo un genero **/
 footer{
-    opacity: 0;
-    display: flex;
+    display: none;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -255,6 +299,19 @@ footer p{
         font-size: 3rem;
         margin-bottom: 10px;
     }
+    .infoMovie p:nth-last-child(2){
+        display: block;
+        max-height: 7.4rem;
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    .movieGenreInfo p:nth-last-child(2){
+        display: block;
+        max-height: 7.4rem;
+        overflow: hidden;
+        margin-bottom: 10px;
+        font-weight: 300;
+    }    
 }
 @media (min-width: 1024px) {
     .movieGenreInfo h3{

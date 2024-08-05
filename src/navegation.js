@@ -1,10 +1,11 @@
+"use strict";
+
 let infiniteScroll;
 window.addEventListener('hashchange',navigator,false);
 window.addEventListener('DOMContentLoaded',navigator,false);
 window.addEventListener('scroll',infiniteScroll,false);
 let maxGenres;
-let iGenres = 2;
-const sectionMovies = document.querySelector('.changeMovies');
+let iGenres = 1;
 const btnReturn = document.querySelector('.btnReturn');
 btnReturn.addEventListener('click',()=>{
     setTimeout(()=>{history.back()},100)
@@ -15,7 +16,7 @@ async function navigator() {
     maxGenres = genres.length
     console.log(maxGenres);
     if(infiniteScroll){
-        window.removeEventListener('scroll', infiniteScroll, { passive: false });
+        window.removeEventListener('scroll', infiniteScroll, false);
         infiniteScroll = undefined;
     }
     if (location.hash.startsWith('#genre')) {
@@ -31,6 +32,7 @@ async function navigator() {
         let [value, c] = b.split('-');
         value = Number(value)
         console.log('el tipo del valor es: ' + typeof value);
+        skeletonOtherMovies()
         getGenres()
         detectGenreOrType(value)
     }else if(location.hash.startsWith('#type')){
@@ -42,6 +44,7 @@ async function navigator() {
         sectionMovies.classList.remove('movies');
         sectionMovies.classList.add('moviesGenre');
         btnReturn.classList.remove('inactive')
+        skeletonOtherMovies()
         getGenres()
         const [ a, b ] = location.hash.split('=');
         detectGenreOrType(b)
@@ -54,6 +57,7 @@ async function navigator() {
         sectionMovies.classList.remove('movies');
         sectionMovies.classList.add('moviesGenre');
         btnReturn.classList.remove('inactive')
+        skeletonOtherMovies()
         const searchQuery = decodeURI(location.hash.split('=')[1]);
         drawSearchMovie(searchQuery)
     }else if(location.hash.startsWith('#movie')){
@@ -65,6 +69,8 @@ async function navigator() {
         sectionMovies.classList.remove('movies');
         sectionMovies.classList.add('moviesGenre');
         btnReturn.classList.remove('inactive')
+        skeletonTrendingMovies()
+        skeletonOtherMovies()
         getGenres()
         const [ a, b ] = location.hash.split('=');
         const [value, c] = b.split('-');
@@ -75,12 +81,15 @@ async function navigator() {
         sectionMovies.classList.add('movies');
         sectionMovies.classList.remove('moviesGenre');
         btnReturn.classList.add('inactive')
-        infiniteScroll = getMoviesPaginatedInMain;
-        skeleton()
+        infiniteScroll = debounce;
+        skeletonTrendingMovies()
+        skeletonMoviesMain()
         getTrendingMovies()
         getMovies()
     }
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
     if(infiniteScroll){
-        window.addEventListener('scroll',infiniteScroll,false);
+        window.addEventListener('scroll',infiniteScroll, { passive: false });
     }
 }
