@@ -1,3 +1,5 @@
+"use strict";
+
 /** Configuracion de Variables globales, nodos y axios **/
 
 /* El siguiente código está configurando una instancia de Axios para realizar peticiones HTTP a
@@ -17,9 +19,12 @@ const axiosRequest = axios.create({
 });
 // Variable de 
 const sectionPreviewTrendingMovies = document.querySelector('.changePreviewTrendingMovies')
+const movies = document.querySelector('.movies');
+const sectionMovies = document.querySelector('.changeMovies');
 // variable del worker
 let worker = new Worker('./src/worker.js')
-let counterRequestId = 0
+let counterRequestId = 0;
+let generos;
 function sendMessage(message) {
     return new Promise((resolve, reject) => {
         const requestId = counterRequestId++
@@ -119,49 +124,6 @@ searchIcon.addEventListener('click',()=>{
 
 /** Creacion del carrusel de las peliculas trending **/
 
-// function getRandomNumber(cuantity ,limit, arr) {
-//     let numbers = new Set();
-//     const info = [];
-//     while (numbers.size < cuantity) {
-//         const randomNumber = Math.floor(Math.random()*limit)
-//         numbers.add(randomNumber);
-//     }
-//     numbers = Array.from(numbers)
-//     for (let i = 0; i < numbers.length; i++) {
-//         const element = numbers[i];
-//         info.push(arr[element])
-//     }
-//     return info
-// }
-/** Obtencion de los generos **/
-// async function getGenres(arr) {
-//     if (arr != undefined) {
-//         const { data } = await axiosRequest('/genre/movie/list')
-//         const res = data.genres;
-//         generos = res;
-//         const newArr = [];
-//         for (let i = 0; i < arr.length; i++) {
-//             const e = arr[i];
-//             for (let j = 0; j < res.length; j++) {
-//                 const f = res[j];
-//                 if (e === f.id) {
-//                     newArr.push(f.name)
-//                 }
-//             }        
-//         }
-//         return newArr
-//     }else{
-//         console.log('entro a los generos sin pedir el array');
-//         const { data } = await axiosRequest('/genre/movie/list')
-//         const res = data.genres;
-//         generos = res;
-//         console.log(generos);
-//     }
-    
-// }
-
-/** fin de la funcion de obtener los generos **/
-
 async function getTrendingMovies() {
     const genresGetTrending = await getGenres();  
     console.log(genresGetTrending);
@@ -188,11 +150,13 @@ async function getTrendingMovies() {
         article.classList.add('backgroundImageMovie')
         article.style.background = `linear-gradient(rgba(5, 7, 12, 0.6), rgba(5, 7, 12, 0.6)), url('https://image.tmdb.org/t/p/w1280${movie.backdrop_path}') no-repeat center`;
         article.style.backgroundSize = 'cover'
-        article.setAttribute('id', `slide${i+1}`)
         const figurePoster = document.createElement('figure')
+        const btnLike = document.createElement('button')
+        btnLike.classList.add('likeTrending')
         const imgPoster = document.createElement('img')
         imgPoster.setAttribute('src',`https://image.tmdb.org/t/p/w300${movie.poster_path}`)
         imgPoster.setAttribute('alt',`${movie.title}`)
+        
         const divInfoMovie = document.createElement('div')
         divInfoMovie.classList.add('previewTrendingMovies--infoMovie')
         const title = document.createElement('h2')
@@ -227,7 +191,7 @@ async function getTrendingMovies() {
         textMovie.appendChild(innerTextMovie)
         calification.append(imgCalification, calificationText)
         divInfoMovie.append(title, calification, textMovie, ul)
-        figurePoster.appendChild(imgPoster)
+        figurePoster.append(btnLike,imgPoster)
         article.append(figurePoster, divInfoMovie)
         divContainer.appendChild(article)
     })
@@ -237,9 +201,21 @@ async function getTrendingMovies() {
 }
 
 /** Creacion de la seccion de peliculas por genero **/
-const movies = document.querySelector('.movies');
+const optionsMainMovies = {
+    root: movies,
+    rootMargin: "0px",
+    threshold: 0.2,
+}
+const lazyLoaderMainMovies = new IntersectionObserver((entries)=>{
+    entries.forEach((entry)=>{
+        if (entry.isIntersecting) {
+            const url = entry.target.getAttribute('data-img');
+            entry.target.setAttribute('src', url);
+        }
+    })
+} ,optionsMainMovies)
 
-async function createMoviesInMain(moviesMain,moviesMain1, moviesMain2, genero1, genero2,{clean = false, lazyLoading = true, inicio = false} = {}) {
+async function createMoviesInMain(dataMovies , genero, {clean = false, lazyLoading = true } = {}) {
     if (clean) {
         const article = document.createElement('article');
         article.classList.add('categoryMovies');
@@ -262,13 +238,18 @@ async function createMoviesInMain(moviesMain,moviesMain1, moviesMain2, genero1, 
         article.append(btnPrev, btnNext);
         const div = document.createElement('div');
         div.classList.add('categoryMovie--Container');
-        moviesMain.results.forEach((movie) => {
+        dataMovies.forEach((movie) => {
+            const btnLike = document.createElement('button')
+            btnLike.classList.add('like')
             const divMovie = document.createElement('div');
             divMovie.classList.add('posterMovieImage');
             divMovie.setAttribute('id-movie', `${movie.id}`);
             const img = document.createElement('img');
-            img.setAttribute('src', `https://image.tmdb.org/t/p/w300${movie.poster_path}`);
+            img.setAttribute(lazyLoading ? 'data-img' : 'src', `https://image.tmdb.org/t/p/w300${movie.poster_path}`);
             img.setAttribute('alt', `${movie.title}`);
+            if (lazyLoading) {
+                lazyLoaderMainMovies.observe(img);
+            }
             divMovie.appendChild(img);
             const divInfo = document.createElement('div');
             divInfo.classList.add('infoMovie');
@@ -295,152 +276,15 @@ async function createMoviesInMain(moviesMain,moviesMain1, moviesMain2, genero1, 
                     li2.appendChild(li2Text);
                     ul.append(li1, li2);
                 }
-            }).catch(error => console.log('Error al identificar géneros:', error));
-            divInfo.append(h3, p, p2, ul);
+            }).catch(error => console.log('Error al identificar géneros:', error));            
+            divInfo.append(btnLike ,h3, p, p2, ul);       
             divMovie.appendChild(divInfo);
             div.appendChild(divMovie);
         });
         movies.innerHTML = '';
         article.appendChild(div);
         movies.appendChild(article);
-    }else if(inicio){       
-        console.log(moviesMain1);
-        console.log(genero1); 
-        movies.innerHTML = '';
-        genero1.forEach((gener, i)=>{
-            const article = document.createElement('article');
-            article.classList.add('categoryMovies');
-            const h2 = document.createElement('h2');
-            h2.addEventListener('click', () => {
-                const content = h2.innerText;
-                detectGenreOrType(content);
-            });
-            const h2Text = document.createTextNode(`${genero1[i].name}`);
-            h2.appendChild(h2Text);
-            article.appendChild(h2);
-            const btnPrev = document.createElement('button');
-            const btnNext = document.createElement('button');
-            btnPrev.classList.add('btnPrev');
-            btnNext.classList.add('btnNext');
-            btnPrev.innerHTML = '<';
-            btnNext.innerHTML = '>';
-            btnNext.onclick = (event) => scrollRight(event);
-            btnPrev.onclick = (event) => left(event);
-            article.append(btnPrev, btnNext);
-            const div = document.createElement('div');
-            div.classList.add('categoryMovie--Container');
-            moviesMain1.forEach((movie) => {
-                const divMovie = document.createElement('div');
-                divMovie.classList.add('posterMovieImage');
-                divMovie.setAttribute('id-movie', `${movie.id}`);
-                const img = document.createElement('img');
-                img.setAttribute('src', `https://image.tmdb.org/t/p/w300${movie.poster_path}`);
-                img.setAttribute('alt', `${movie.title}`);
-                divMovie.appendChild(img);
-                const divInfo = document.createElement('div');
-                divInfo.classList.add('infoMovie');
-                const h3 = document.createElement('h3');
-                const h3Text = document.createTextNode(`${movie.title}`);
-                h3.appendChild(h3Text);
-                const p = document.createElement('p');
-                const imgStar = document.createElement('img');
-                imgStar.setAttribute('src', './src/img/star-regular.png');
-                const pText = document.createTextNode(`${movie.vote_average.toFixed(1)}`);
-                p.appendChild(imgStar);
-                p.appendChild(pText);
-                const p2 = document.createElement('p');
-                const pText2 = document.createTextNode(`${movie.overview}`);
-                p2.appendChild(pText2);
-                const ul = document.createElement('ul');
-                const li1 = document.createElement('li');
-                const li2 = document.createElement('li');
-                sendMessage({ type: 'identifyGenres', data: { arrG: movie.genre_ids, arrG2: generos } }).then((infoG) => {
-                    if (infoG && infoG.length > 0) {
-                        const li1Text = document.createTextNode(`${infoG[0] || ''}`);
-                        const li2Text = document.createTextNode(`${infoG[1] || ''}`);
-                        li1.appendChild(li1Text);
-                        li2.appendChild(li2Text);
-                        ul.append(li1, li2);
-                    }
-                }).catch(error => console.log('Error al identificar géneros:', error));
-                divInfo.append(h3, p, p2, ul);
-                divMovie.appendChild(divInfo);
-                div.appendChild(divMovie);
-            });
-            article.appendChild(div);
-            movies.appendChild(article);
-        })
-        genero2.forEach((gener, i)=>{
-            const article = document.createElement('article');
-            article.classList.add('categoryMovies');
-            const h2 = document.createElement('h2');
-            h2.addEventListener('click', () => {
-                const content = h2.innerText;
-                detectGenreOrType(content);
-            });
-            const h2Text = document.createTextNode(`${genero2[i].name}`);
-            h2.appendChild(h2Text);
-            article.appendChild(h2);
-            const btnPrev = document.createElement('button');
-            const btnNext = document.createElement('button');
-            btnPrev.classList.add('btnPrev');
-            btnNext.classList.add('btnNext');
-            btnPrev.innerHTML = '<';
-            btnNext.innerHTML = '>';
-            btnNext.onclick = (event) => scrollRight(event);
-            btnPrev.onclick = (event) => left(event);
-            article.append(btnPrev, btnNext);
-            const div = document.createElement('div');
-            div.classList.add('categoryMovie--Container');
-            moviesMain2.forEach((movie) => {
-                const divMovie = document.createElement('div');
-                divMovie.classList.add('posterMovieImage');
-                divMovie.setAttribute('id-movie', `${movie.id}`);
-                const img = document.createElement('img');
-                img.setAttribute('src', `https://image.tmdb.org/t/p/w300${movie.poster_path}`);
-                img.setAttribute('alt', `${movie.title}`);
-                divMovie.appendChild(img);
-                const divInfo = document.createElement('div');
-                divInfo.classList.add('infoMovie');
-                const h3 = document.createElement('h3');
-                const h3Text = document.createTextNode(`${movie.title}`);
-                h3.appendChild(h3Text);
-                const p = document.createElement('p');
-                const imgStar = document.createElement('img');
-                imgStar.setAttribute('src', './src/img/star-regular.png');
-                const pText = document.createTextNode(`${movie.vote_average.toFixed(1)}`);
-                p.appendChild(imgStar);
-                p.appendChild(pText);
-                const p2 = document.createElement('p');
-                const pText2 = document.createTextNode(`${movie.overview}`);
-                p2.appendChild(pText2);
-                const ul = document.createElement('ul');
-                const li1 = document.createElement('li');
-                const li2 = document.createElement('li');
-                sendMessage({ type: 'identifyGenres', data: { arrG: movie.genre_ids, arrG2: generos } }).then((infoG) => {
-                    if (infoG && infoG.length > 0) {
-                        const li1Text = document.createTextNode(`${infoG[0] || ''}`);
-                        const li2Text = document.createTextNode(`${infoG[1] || ''}`);
-                        li1.appendChild(li1Text);
-                        li2.appendChild(li2Text);
-                        ul.append(li1, li2);
-                    }
-                }).catch(error => console.log('Error al identificar géneros:', error));
-                divInfo.append(h3, p, p2, ul);
-                divMovie.appendChild(divInfo);
-                div.appendChild(divMovie);
-            });
-            article.appendChild(div);
-            movies.appendChild(article);
-        })
     }else{
-        // const btnmore = document.createElement('button');
-        // btnmore.classList.add('btnMore');
-        // btnmore.innerText = 'Ver mas';
-        // btnmore.addEventListener('click', () => {
-        //     iGenres ++;
-        //     getMovies(iGenres, {clean: false});
-        // })
         const article = document.createElement('article');
         article.classList.add('categoryMovies');
         const h2 = document.createElement('h2');
@@ -448,7 +292,7 @@ async function createMoviesInMain(moviesMain,moviesMain1, moviesMain2, genero1, 
             const content = h2.innerText;
             detectGenreOrType(content);
         });
-        const h2Text = document.createTextNode(`${genero1}`);
+        const h2Text = document.createTextNode(`${genero}`);
         h2.appendChild(h2Text);
         article.appendChild(h2);
         const btnPrev = document.createElement('button');
@@ -457,18 +301,23 @@ async function createMoviesInMain(moviesMain,moviesMain1, moviesMain2, genero1, 
         btnNext.classList.add('btnNext');
         btnPrev.innerHTML = '<';
         btnNext.innerHTML = '>';
-        btnNext.onclick = (event) => scrollRight(event);
-        btnPrev.onclick = (event) => left(event);
+        btnNext.onclick = (event) => scrollRight(event,false);
+        btnPrev.onclick = (event) => left(event,false);
         article.append(btnPrev, btnNext);
         const div = document.createElement('div');
         div.classList.add('categoryMovie--Container');
-        moviesMain.results.forEach((movie) => {
+        dataMovies.results.forEach((movie) => {
+            const btnLike = document.createElement('button')
+            btnLike.classList.add('like')
             const divMovie = document.createElement('div');
             divMovie.classList.add('posterMovieImage');
             divMovie.setAttribute('id-movie', `${movie.id}`);
             const img = document.createElement('img');
-            img.setAttribute('src', `https://image.tmdb.org/t/p/w300${movie.poster_path}`);
+            img.setAttribute(lazyLoading ? 'data-img' : 'src', `https://image.tmdb.org/t/p/w300${movie.poster_path}`);
             img.setAttribute('alt', `${movie.title}`);
+            if (lazyLoading) {
+                lazyLoaderMainMovies.observe(img);
+            }
             divMovie.appendChild(img);
             const divInfo = document.createElement('div');
             divInfo.classList.add('infoMovie');
@@ -495,8 +344,8 @@ async function createMoviesInMain(moviesMain,moviesMain1, moviesMain2, genero1, 
                     li2.appendChild(li2Text);
                     ul.append(li1, li2);
                 }
-            }).catch(error => console.log('Error al identificar géneros:', error));
-            divInfo.append(h3, p, p2, ul);
+            }).catch(error => console.log('Error al identificar géneros:', error));           
+            divInfo.append(btnLike, h3, p, p2, ul);
             divMovie.appendChild(divInfo);
             div.appendChild(divMovie);
         });
@@ -509,76 +358,84 @@ async function getMovies() {
     try {
         const generos = await getGenres();
         const indexGenre = generos[0]
-        const indexGenre2 = generos[1]
         const { data: result } = await axiosRequest('/discover/movie', {
             params: {
                 with_genres: indexGenre.id
             }
         });
-        const { data: result2 } = await axiosRequest('/discover/movie', {
-            params: {
-                with_genres: indexGenre2.id
-            }
-        })
-        const genero = new Array(generos[0]) 
-        const genero2 = new Array(generos[1])
-        createMoviesInMain(undefined, result.results, result2.results, genero, genero2,{ clean: false, lazyLoading: true, inicio:true});        
-        // const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-        // const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight - 10);
-        // if(scrollIsBottom && i < maxGenres){
-
-        // }else if(!scrollIsBottom){
-        //     const generos = await getGenres();
-        //     console.log(maxGenres);
-        //     const indexGenre = generos[0]
-        //     console.log(indexGenre);
-        //     const { data: result } = await axiosRequest('/discover/movie', {
-        //         params: {
-        //             with_genres: indexGenre.id
-        //         }
-        //     });
-        //     createMoviesInMain( result, { clean: false, lazyLoading: true });
-        // }
+        createMoviesInMain(result.results, indexGenre.name,{ clean: true, lazyLoading: true});        
     } catch (error) {
         console.log(error);
     }
 }
 const footer = document.querySelector('footer');
+let timeout;
+function debounce() {
+    clearTimeout(timeout);
+    console.log('debounce');    
+    timeout = setTimeout(() => getMoviesPaginatedInMain(), 100);
+    
+}
 async function getMoviesPaginatedInMain(){
+    console.log('paginated');    
     const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-    const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight-15);
-    console.log(iGenres);
+    const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight-100);   
+    console.log(clientHeight-100);
     if(scrollIsBottom && iGenres < maxGenres){
         const generos = await getGenres();
-        if (iGenres < maxGenres){
-            const indexGenre = generos[iGenres]
-            const { data: result } = await axiosRequest('/discover/movie', {
-                params: {
+        const indexGenre = generos[iGenres]
+        const { data: result } = await axiosRequest('/discover/movie', {
+            params: {
                 with_genres: indexGenre.id
-                }
-            });
-            createMoviesInMain( result, undefined, undefined, indexGenre.name, undefined,{ clean: false, lazyLoading: true, inicio: false });
-            iGenres++;
-        }
-        if (iGenres>= maxGenres){
-            footer.style.opacity = '1';                
-        }
+            }
+        });
+        iGenres++;
+        console.log(result);
+        console.log('por aqui paso');
+        console.log(iGenres);
+        createMoviesInMain( result, indexGenre.name, { clean: false, lazyLoading: true});
+    }
+    if (iGenres === maxGenres){
+        console.log(maxGenres);
+        console.log(iGenres);
+                    
+        console.log('ya no hay mas generos');
+        
+        footer.style.display = 'flex';                
     }
 }
 
-function scrollRight(event){
-    const container = event.target.closest('article').querySelector('.categoryMovie--Container');
-    container.scrollBy({
-        left: 170, // Desplaza hacia la derecha
-        behavior: 'smooth'
-    });
+function scrollRight(event, fav){
+    if (!fav) {
+        const container = event.target.closest('article').querySelector('.categoryMovie--Container');
+        container.scrollBy({
+            left: 170, // Desplaza hacia la derecha
+            behavior: 'smooth'
+        });        
+    }
+    else{
+        const container2 = event.target.closest('section').querySelector('.favMovies--container');
+        container2.scrollBy({
+            left: 170, // Desplaza hacia la derecha
+            behavior: 'smooth'
+        }); 
+    } 
+    
 }
-function left(event){
-    const container = event.target.closest('article').querySelector('.categoryMovie--Container');
-    container.scrollBy({
-        left: -170, // Desplaza hacia la izquierda
-        behavior: 'smooth'
-    });
+function left(event, fav){
+    if (!fav) {
+        const container = event.target.closest('article').querySelector('.categoryMovie--Container');
+        container.scrollBy({
+            left: -170, // Desplaza hacia la izquierda
+            behavior: 'smooth'
+        });
+    }else{
+        const container2 = event.target.closest('.favMovies').querySelector('.favMovies--container');
+        container2.scrollBy({
+            left: -170, // Desplaza hacia la izquierda
+            behavior: 'smooth'
+        });
+    }
 }
 
 /** Busqueda de peliculas segun la opcion estreno, popular y tendencia**/
@@ -673,24 +530,35 @@ function detectGenreOrType(value) {
     }
 }
 
-function drawMoviesGenresAndType(arr, genero) {
+/** Carga de Imagenes de recomendaciones**/
+const lazyLoaderRecomendations = new IntersectionObserver((entries)=>{
+    entries.forEach((entry)=>{
+        if (entry.isIntersecting) {
+            const url = entry.target.getAttribute('data-img');
+            entry.target.setAttribute('src', url);
+        }
+    })
+})
+
+function drawMoviesGenresAndType(arr, genero, { lazyLoading = true } ={}) {
     console.log('esta dibujando');
     const getGenresForDraw = JSON.parse(localStorage.getItem('genres'))
     console.log(getGenresForDraw);
     const moviesGenreContainer = document.createElement('article')
     const moviesGenre = document.querySelector('.moviesGenre')
-    sectionMovies.innerHTML = ''
     const titleGenre = document.createElement('h2')
-    titleGenre.innerText = genero;
-    moviesGenre.append(titleGenre)    
+    titleGenre.innerText = genero;    
     moviesGenreContainer.classList.add('moviesGenre--Container')
     arr.forEach((movie)=>{
         const divMovie = document.createElement('div')
         divMovie.classList.add('movieGenrePoster')
         divMovie.setAttribute('id-movie',`${movie.id}`)
         const imgPosterMovie = document.createElement('img')
-        imgPosterMovie.setAttribute('src',`https://image.tmdb.org/t/p/w300${movie.poster_path}`)
+        imgPosterMovie.setAttribute(lazyLoading ? 'data-img' : 'src',`https://image.tmdb.org/t/p/w300${movie.poster_path}`)
         imgPosterMovie.setAttribute('alt',`${movie.title}`)
+        if (lazyLoading) {
+            lazyLoaderRecomendations.observe(imgPosterMovie);
+        }
         divMovie.append(imgPosterMovie)
         const movieGenreInfo = document.createElement('div')
         movieGenreInfo.classList.add('movieGenreInfo')
@@ -720,17 +588,12 @@ function drawMoviesGenresAndType(arr, genero) {
                 ul.append(li1, li2)
             }
         }))
-        // getGenres(movie.genre_ids).then((data)=>{
-        //     li1Text = document.createTextNode(`${data[0]}`)
-        //     li2Text = document.createTextNode(`${data[1]}`)
-        //     li2.appendChild(li2Text)
-        //     li1.appendChild(li1Text)
-        //     ul.append(li1, li2)
-        // })
         movieGenreInfo.append(h3, p, p2, ul)
         divMovie.append(movieGenreInfo)
         moviesGenreContainer.append(divMovie)
     })
+    sectionMovies.innerHTML = ''
+    moviesGenre.append(titleGenre)
     moviesGenre.appendChild(moviesGenreContainer)
 }
 
@@ -763,7 +626,6 @@ movies.addEventListener('click', (event) => {
 async function drawMovieById(movieId){
     console.log('entro a dibujar por id');
     const { data: movie } = await axiosRequest(`/movie/${movieId}`)    
-    sectionPreviewTrendingMovies.innerHTML = ''
     const articleMovie = document.createElement('article')
     articleMovie.classList.add('backgroundImageMovie')
     articleMovie.style.background = `linear-gradient(rgba(5, 7, 12, 0.6), rgba(5, 7, 12, 0.6)), url('https://image.tmdb.org/t/p/w1280${movie.backdrop_path}') no-repeat center`;
@@ -802,6 +664,7 @@ async function drawMovieById(movieId){
     })
     divInfo.append(h2, p, p2, ul)
     articleMovie.append(figure, divInfo)
+    sectionPreviewTrendingMovies.innerHTML = '';
     sectionPreviewTrendingMovies.append(articleMovie)
 
     const { data: recomendationMovies } = await axiosRequest(`/movie/${movieId}/recommendations`)
@@ -836,21 +699,7 @@ async function drawSearchMovie(value){
     drawMoviesGenresAndType(moviesSearch.results, value)
 }
 
-function skeleton(){
-    sectionPreviewTrendingMovies.innerHTML = `
-        <article class="backgroundImageMovie">
-                <figure class="loading"></figure>
-                <div class="previewTrendingMovies--infoMovie">
-                    <h2 class="loading"></h2>
-                    <p class="loading one"><!--<img>--></p>
-                    <p class="loading"></p>
-                    <ul>
-                        <li class="loading"></li>
-                        <li class="loading"></li>
-                    </ul>
-                </div>
-            </article>
-    `;
+function skeletonMoviesMain(){
     movies.innerHTML = `
             <article class="categoryMovies">
                 <h2 class="loading"></h2>
@@ -869,5 +718,48 @@ function skeleton(){
                     <div class="loading"></div>
                     </div>
             </article>
+    `;
+}
+function skeletonTrendingMovies() {
+    sectionPreviewTrendingMovies.innerHTML = `
+        <article class="backgroundImageMovie">
+                <figure class="loading"></figure>
+                <div class="previewTrendingMovies--infoMovie">
+                    <h2 class="loading"></h2>
+                    <p class="loading one"><!--<img>--></p>
+                    <p class="loading"></p>
+                    <ul>
+                        <li class="loading"></li>
+                        <li class="loading"></li>
+                    </ul>
+                </div>
+            </article>
+    `;
+}
+function skeletonOtherMovies(){
+    sectionMovies.innerHTML = `
+    <h2 class="loading"></h2>
+    <article class="moviesGenre--Container">
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+        <div class="movieGenrePoster loading"></div>
+    </article>
     `;
 }
