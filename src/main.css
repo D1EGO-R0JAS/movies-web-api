@@ -91,6 +91,12 @@ div.loading{
 .btnNext{
     right: 10px;
 }
+.favMovies--container span{
+    font-family: var(--font);
+    color: var(--icons-color);
+    font-size: 1.6rem;
+    text-align: center;
+}
 .categoryMovie--Container{
     display: grid;
     grid-template-columns: repeat(20,150px);

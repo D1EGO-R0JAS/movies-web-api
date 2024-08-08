@@ -177,8 +177,13 @@ async function getTrendingMovies() {
         imgCalification.setAttribute('src','./src/img/star-regular.png')
         imgCalification.setAttribute('alt','Calification of movie')
         const calificationText = document.createTextNode(`${movie.vote_average.toFixed(1)}`)
-        const textMovie = document.createElement('p')
-        const innerTextMovie = document.createTextNode(`${movie.overview}`)
+        const textMovie = document.createElement('p');
+        let innerTextMovie;
+        if (movie.overview === '') {
+            innerTextMovie = document.createTextNode(`Sinopsis no disponible, lo sentimos.`);
+        }else{
+            innerTextMovie = document.createTextNode(`${movie.overview}`);
+        }
         const ul = document.createElement('ul')
         let li1 = document.createElement('li')
         let li2 = document.createElement('li')
@@ -277,7 +282,12 @@ async function createMoviesInMain(dataMovies , genero, {clean = false, lazyLoadi
             p.appendChild(imgStar);
             p.appendChild(pText);
             const p2 = document.createElement('p');
-            const pText2 = document.createTextNode(`${movie.overview}`);
+            let pText2;
+            if (movie.overview === '') {
+                pText2 = document.createTextNode(`Sinopsis no disponible, lo sentimos.`);
+            }else{
+                pText2 = document.createTextNode(`${movie.overview}`);
+            }
             p2.appendChild(pText2);
             const ul = document.createElement('ul');
             const li1 = document.createElement('li');
@@ -349,7 +359,12 @@ async function createMoviesInMain(dataMovies , genero, {clean = false, lazyLoadi
             p.appendChild(imgStar);
             p.appendChild(pText);
             const p2 = document.createElement('p');
-            const pText2 = document.createTextNode(`${movie.overview}`);
+            let pText2;
+            if (movie.overview === '') {
+                pText2 = document.createTextNode(`sinopsis no disponible, lo sentimos.`);
+            }else{
+                pText2 = document.createTextNode(`${movie.overview}`);
+            }                                    
             p2.appendChild(pText2);
             const ul = document.createElement('ul');
             const li1 = document.createElement('li');
@@ -577,6 +592,9 @@ function drawMoviesGenresAndType(arr, genero, { lazyLoading = true } ={}) {
         if (lazyLoading) {
             lazyLoaderRecomendations.observe(imgPosterMovie);
         }
+        imgPosterMovie.addEventListener('error',()=>{
+            imgPosterMovie.setAttribute('src','./src/img/Pelicula-No-Disponible.jpg')
+        })
         divMovie.append(imgPosterMovie)
         const movieGenreInfo = document.createElement('div')
         movieGenreInfo.classList.add('movieGenreInfo')
@@ -597,7 +615,12 @@ function drawMoviesGenresAndType(arr, genero, { lazyLoading = true } ={}) {
         p.appendChild(imgStar)
         p.appendChild(pText)
         const p2 = document.createElement('p')
-        const pText2 = document.createTextNode(`${movie.overview}`)
+        let pText2;
+            if (movie.overview === '') {
+                pText2 = document.createTextNode(`Sinopsis no disponible, lo sentimos.`);
+            }else{
+                pText2 = document.createTextNode(`${movie.overview}`);
+            }
         p2.appendChild(pText2)
         const ul = document.createElement('ul')
         const li1 = document.createElement('li')
@@ -693,7 +716,12 @@ async function drawMovieById(movieId){
     const pText = document.createTextNode(`${movie.vote_average.toFixed(1)}`)
     p.append(imgStar , pText)
     const p2 = document.createElement('p')
-    const p2Text = document.createTextNode(`${movie.overview}`)
+    let p2Text;
+    if (movie.overview === '') {
+        p2Text = document.createTextNode(`Sinopsis no disponible, lo sentimos.`);
+    }else{
+        p2Text = document.createTextNode(`${movie.overview}`);
+    }
     p2.appendChild(p2Text)
     const ul = document.createElement('ul')
     const genresMovie = movie.genres;
@@ -985,7 +1013,12 @@ function drawFavsMovies() {
             const pText = document.createTextNode(movie.points);
             p.append(imgStar, pText);
             const overview = document.createElement('p');
-            const textOverview = document.createTextNode(movie.overview);
+            let textOverview;
+            if (movie.overview === '') {
+                textOverview = document.createTextNode('No contamos con la Sinopsis de esta pelicula, lo sentimos');   
+            }else{
+                textOverview = document.createTextNode(movie.overview);  
+            }
             overview.appendChild(textOverview);
             const ul = document.createElement('ul');
             const li1 = document.createElement('li');
@@ -1003,6 +1036,10 @@ function drawFavsMovies() {
         sectionFavMovies.innerHTML = ''
         sectionFavMovies.append(titleSection, btnPrev, btnNext, article);
     }else{
+        const textoVacio = document.createElement('span');
+        const textoVacioText = document.createTextNode('No tienes peliculas favoritas, agregalas dando click en el corazon 💙');
+        textoVacio.appendChild(textoVacioText);
+        article.appendChild(textoVacio);
         sectionFavMovies.innerHTML = '';
         sectionFavMovies.append(titleSection, btnPrev, btnNext, article);
     }
