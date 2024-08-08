@@ -24,7 +24,8 @@ async function navigator() {
         clearInterval(sliderInterval);
         sectionPreviewTrendingMovies.innerHTML = '';
         sectionPreviewTrendingMovies.classList.remove('previewTrendingMovies');
-        sectionMovies.innerHTML = ''
+        sectionMovies.innerHTML = '';
+        sectionFavMovies.innerHTML = '';
         sectionMovies.classList.remove('movies');
         sectionMovies.classList.add('moviesGenre');
         btnReturn.classList.remove('inactive')
@@ -39,6 +40,7 @@ async function navigator() {
         console.log('type');
         clearInterval(sliderInterval);
         sectionPreviewTrendingMovies.innerHTML = '';
+        sectionFavMovies.innerHTML = '';
         sectionPreviewTrendingMovies.classList.remove('previewTrendingMovies');
         sectionMovies.innerHTML = ''
         sectionMovies.classList.remove('movies');
@@ -52,6 +54,7 @@ async function navigator() {
         console.log('search');
         clearInterval(sliderInterval);
         sectionPreviewTrendingMovies.innerHTML = '';
+        sectionFavMovies.innerHTML = '';
         sectionPreviewTrendingMovies.classList.remove('previewTrendingMovies');
         sectionMovies.innerHTML = ''
         sectionMovies.classList.remove('movies');
@@ -64,6 +67,7 @@ async function navigator() {
         console.log('movie');
         clearInterval(sliderInterval);
         sectionPreviewTrendingMovies.innerHTML = '';
+        sectionFavMovies.innerHTML = '';
         sectionPreviewTrendingMovies.classList.remove('previewTrendingMovies');
         sectionMovies.innerHTML = ''
         sectionMovies.classList.remove('movies');
@@ -82,10 +86,13 @@ async function navigator() {
         sectionMovies.classList.remove('moviesGenre');
         btnReturn.classList.add('inactive')
         infiniteScroll = debounce;
+        currentSlide = 0;
+        interval()
         skeletonTrendingMovies()
         skeletonMoviesMain()
         getTrendingMovies()
         getMovies()
+        setTimeout(()=>drawFavsMovies(),1600)
     }
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;

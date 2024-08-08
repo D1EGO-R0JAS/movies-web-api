@@ -26,7 +26,7 @@ div.loading{
 .favMovies{
     width: 100%;
     height: auto;
-    margin: 40px 0 0 0;
+    margin: 20px 0 0 0;
     padding: 20px 10px 0 10px;
 }
 .favMovies h2{
@@ -110,10 +110,25 @@ div.loading{
 .infoMovie{
     display: none;
 }
-.like::before{
+.infoMovie button::before, .movieGenreInfo button::before{
     content: '💙';
 }
-.like{
+.infoMovie button, .movieGenreInfo button{
+    position: absolute;
+    top: 10px;
+    right: 5px;
+    font-size: 1.2rem;
+    background-color: var(--letters-color);
+    border-radius: 50%;
+    border: none;
+    padding: 2.2px;
+    cursor: pointer;
+}
+.infoMovie .liked::before , .movieGenreInfo .liked::before{
+    content: '💔';
+}
+.infoMovie .liked, .movieGenreInfo .liked{
+    content: '💔';
     position: absolute;
     top: 10px;
     right: 5px;
