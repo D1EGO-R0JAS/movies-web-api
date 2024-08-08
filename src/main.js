@@ -21,6 +21,7 @@ const axiosRequest = axios.create({
 const sectionPreviewTrendingMovies = document.querySelector('.changePreviewTrendingMovies')
 const movies = document.querySelector('.movies');
 const sectionMovies = document.querySelector('.changeMovies');
+const sectionFavMovies = document.querySelector('.favMovies')
 // variable del worker
 let worker = new Worker('./src/worker.js')
 let counterRequestId = 0;
@@ -79,7 +80,7 @@ hambuegerMenu.addEventListener('click',()=>{
 
 /** inicio de la interaccion del slider de trending movies **/
 
-let currentSlide = 0;
+let currentSlide;
 
 function showSlide(index) {
     const slides = document.querySelectorAll('.backgroundImageMovie');
@@ -104,7 +105,11 @@ function prevSlide() {
 }
 
 // Auto-slide every 5 seconds
-let sliderInterval = setInterval(nextSlide, 12000);
+let sliderInterval;
+function interval(){
+    sliderInterval = setInterval(nextSlide, 12000);
+}
+// let sliderInterval = setInterval(nextSlide, 12000);
 
 /** fin de la interaccion del slider de trending movies **/
 
@@ -132,7 +137,7 @@ async function getTrendingMovies() {
         cuantity: 6,
         limit: data.results.length,
         arr: data.results
-    }
+    }    
     const movies = await sendMessage({type: 'getRandomNumber', data: workerData1});
     const btnAnterior = document.createElement('button')
     btnAnterior.classList.add('btn', 'anterior')
@@ -141,8 +146,7 @@ async function getTrendingMovies() {
     btnAnterior.innerText = '<';
     btnSiguiente.innerText = '>';
     btnAnterior.onclick = prevSlide;
-    btnSiguiente.onclick = nextSlide;
-    
+    btnSiguiente.onclick = nextSlide;    
     const divContainer = document.createElement('div')
     divContainer.classList.add('slideContainer')
     movies.forEach((movie, i)=>{
@@ -151,12 +155,18 @@ async function getTrendingMovies() {
         article.style.background = `linear-gradient(rgba(5, 7, 12, 0.6), rgba(5, 7, 12, 0.6)), url('https://image.tmdb.org/t/p/w1280${movie.backdrop_path}') no-repeat center`;
         article.style.backgroundSize = 'cover'
         const figurePoster = document.createElement('figure')
+        article.setAttribute('id-movie',`${movie.id}`)
         const btnLike = document.createElement('button')
-        btnLike.classList.add('likeTrending')
+        const favsMovies = getFavsMovies()
+        console.log(favsMovies);        
+        if (favsMovies[movie.id]) {
+            console.log('Entro al condicional');            
+            btnLike.classList.add('likedTrending');
+        }
+        btnLike.classList.add('btnLike')
         const imgPoster = document.createElement('img')
         imgPoster.setAttribute('src',`https://image.tmdb.org/t/p/w300${movie.poster_path}`)
-        imgPoster.setAttribute('alt',`${movie.title}`)
-        
+        imgPoster.setAttribute('alt',`${movie.title}`)        
         const divInfoMovie = document.createElement('div')
         divInfoMovie.classList.add('previewTrendingMovies--infoMovie')
         const title = document.createElement('h2')
@@ -240,7 +250,11 @@ async function createMoviesInMain(dataMovies , genero, {clean = false, lazyLoadi
         div.classList.add('categoryMovie--Container');
         dataMovies.forEach((movie) => {
             const btnLike = document.createElement('button')
-            btnLike.classList.add('like')
+            const favsMovies = getFavsMovies();
+            if (favsMovies[movie.id]) {
+                console.log('Entro al condicional');            
+                btnLike.classList.add('liked');
+            }
             const divMovie = document.createElement('div');
             divMovie.classList.add('posterMovieImage');
             divMovie.setAttribute('id-movie', `${movie.id}`);
@@ -308,7 +322,11 @@ async function createMoviesInMain(dataMovies , genero, {clean = false, lazyLoadi
         div.classList.add('categoryMovie--Container');
         dataMovies.results.forEach((movie) => {
             const btnLike = document.createElement('button')
-            btnLike.classList.add('like')
+            const favsMovies = getFavsMovies();
+            if (favsMovies[movie.id]) {
+                console.log('Entro al condicional');            
+                btnLike.classList.add('liked');
+            }
             const divMovie = document.createElement('div');
             divMovie.classList.add('posterMovieImage');
             divMovie.setAttribute('id-movie', `${movie.id}`);
@@ -562,6 +580,12 @@ function drawMoviesGenresAndType(arr, genero, { lazyLoading = true } ={}) {
         divMovie.append(imgPosterMovie)
         const movieGenreInfo = document.createElement('div')
         movieGenreInfo.classList.add('movieGenreInfo')
+        const btnLike = document.createElement('button')
+        const favsMovies = getFavsMovies();
+        if (favsMovies[movie.id]) {
+            console.log('Entro al condicional');            
+            btnLike.classList.add('liked');
+        }
         const h3 = document.createElement('h3')
         h3.classList.add('movieGenreTitle')
         const h3Text = document.createTextNode(`${movie.title}`)
@@ -588,14 +612,30 @@ function drawMoviesGenresAndType(arr, genero, { lazyLoading = true } ={}) {
                 ul.append(li1, li2)
             }
         }))
-        movieGenreInfo.append(h3, p, p2, ul)
+        movieGenreInfo.append(btnLike, h3, p, p2, ul)        
         divMovie.append(movieGenreInfo)
         moviesGenreContainer.append(divMovie)
     })
     sectionMovies.innerHTML = ''
     moviesGenre.append(titleGenre)
     moviesGenre.appendChild(moviesGenreContainer)
+    footer.style.display = 'flex';
 }
+
+sectionFavMovies.addEventListener('click', (event) => {
+    if (event.target.tagName === 'H3' && event.target.closest('.infoMovie')) {
+        console.log('entro por el de movies');
+        const movieElement = event.target.closest('.posterMovieImage');
+        const title = event.target.textContent
+        if (movieElement) {
+            const movieId = movieElement.getAttribute('id-movie'); 
+            location.hash = `#movie=${movieId}-${title}`;
+            drawMovieById(movieId)
+        } else {
+            console.log('Elemento del producto no encontrado.');
+        }
+    }
+})
 
 movies.addEventListener('click', (event) => {
     if (event.target.tagName === 'H3' && event.target.closest('.infoMovie')) {
@@ -630,10 +670,18 @@ async function drawMovieById(movieId){
     articleMovie.classList.add('backgroundImageMovie')
     articleMovie.style.background = `linear-gradient(rgba(5, 7, 12, 0.6), rgba(5, 7, 12, 0.6)), url('https://image.tmdb.org/t/p/w1280${movie.backdrop_path}') no-repeat center`;
     articleMovie.style.backgroundSize = 'cover'
+    articleMovie.setAttribute('id-movie',`${movie.id}`)
     const figure = document.createElement('figure')
     const imgMovie = document.createElement('img')
     imgMovie.setAttribute('src',`https://image.tmdb.org/t/p/w300${movie.poster_path}`)
-    figure.append(imgMovie)
+    const btnLike = document.createElement('button')
+    btnLike.classList.add('btnLike')
+    const favsMovies = getFavsMovies();
+    if (favsMovies[movieId]) {
+        console.log('Entro al condicional');            
+        btnLike.classList.add('likedTrending');
+    }
+    figure.append(btnLike ,imgMovie)
     const divInfo = document.createElement('div')
     divInfo.classList.add('previewTrendingMovies--infoMovie')
     const h2 = document.createElement('h2')
@@ -673,7 +721,7 @@ async function drawMovieById(movieId){
     }else{
         drawMoviesGenresAndType(recomendationMovies.results, 'Recomendaciones')
     }
-    
+    footer.style.display = 'flex';
 }
 
 /** Interaccion de Busqueda **/
@@ -700,6 +748,16 @@ async function drawSearchMovie(value){
 }
 
 function skeletonMoviesMain(){
+    sectionFavMovies.innerHTML = `
+        <h2 class="loading"></h2>
+        <article class="favMovies--container">
+            <div class="loading"></div>
+            <div class="loading"></div>
+            <div class="loading"></div>
+            <div class="loading"></div>
+        </article>   
+    `;
+    console.log('skeleton favs' + sectionFavMovies);    
     movies.innerHTML = `
             <article class="categoryMovies">
                 <h2 class="loading"></h2>
@@ -762,4 +820,190 @@ function skeletonOtherMovies(){
         <div class="movieGenrePoster loading"></div>
     </article>
     `;
+}
+
+sectionFavMovies.addEventListener('click', (event)=>{
+    if (event.target.closest('.infoMovie button')) {
+        console.log('Entro a la seccion de favoritos');
+        const heart = event.target.closest('.infoMovie button')          
+        heart.classList.toggle('liked')
+        const infoIdMovie = event.target.closest('.posterMovieImage').getAttribute('id-movie');
+        const pictureMovie = event.target.closest('.posterMovieImage').querySelector('img').getAttribute('src');
+        const titleMovie = event.target.closest('.infoMovie').querySelector('h3').innerText;
+        console.log(infoIdMovie);
+        const points = event.target.closest('.infoMovie').querySelector('p').innerText;
+        const overview = event.target.closest('.infoMovie').querySelector('p:nth-last-child(2)').innerText;
+        const genre1 = event.target.closest('.infoMovie').querySelector('ul li:nth-child(1)').innerText;
+        const genre2 = event.target.closest('.infoMovie').querySelector('ul li:nth-child(2)').innerText;
+        const genres = [genre1, genre2];
+        addOrDeleteFavs({infoIdMovie, titleMovie, pictureMovie, points, overview, genres});
+        console.log(infoIdMovie, titleMovie, pictureMovie, points, overview, genres);
+        getTrendingMovies()
+        iGenres = 1
+        getMovies()
+        drawFavsMovies()
+    }
+})
+
+sectionMovies.addEventListener('click', (event) => {
+    if (event.target.closest('.infoMovie button')) {
+        if (event.target.closest('.posterMovieImage')) {
+            console.log('encotro lo que se busco');        
+            const heart = event.target.closest('.infoMovie button')          
+            heart.classList.toggle('liked')
+            const infoIdMovie = event.target.closest('.posterMovieImage').getAttribute('id-movie');
+            const pictureMovie = event.target.closest('.posterMovieImage').querySelector('img').getAttribute('src');
+            const titleMovie = event.target.closest('.infoMovie').querySelector('h3').innerText;
+            console.log(infoIdMovie);
+            const points = event.target.closest('.infoMovie').querySelector('p').innerText;
+            const overview = event.target.closest('.infoMovie').querySelector('p:nth-last-child(2)').innerText;
+            const genre1 = event.target.closest('.infoMovie').querySelector('ul li:nth-child(1)').innerText;
+            const genre2 = event.target.closest('.infoMovie').querySelector('ul li:nth-child(2)').innerText;
+            const genres = [genre1, genre2];
+            addOrDeleteFavs({infoIdMovie, titleMovie, pictureMovie, points, overview, genres});
+            console.log(infoIdMovie, titleMovie, pictureMovie, points, overview, genres);
+            if (!location.hash.startsWith('#genre') && !location.hash.startsWith('#type') && !location.hash.startsWith('#search') && !location.hash.startsWith('#movie')) {
+                drawFavsMovies()
+                getTrendingMovies()
+                console.log('entro desde sectionMovies');                
+            }            
+        }      
+    }
+    else if(event.target.closest('.movieGenreInfo button')){
+        console.log('encotro lo que se busco en recomendaciones o generos');        
+        const heart = event.target.closest('.movieGenreInfo button')
+        console.log(heart);            
+        heart.classList.toggle('liked')
+        const infoIdMovie = event.target.closest('.movieGenrePoster').getAttribute('id-movie');
+        const pictureMovie = event.target.closest('.movieGenrePoster').querySelector('img').getAttribute('src');
+        const titleMovie = event.target.closest('.movieGenreInfo').querySelector('h3').innerText;
+        const points = event.target.closest('.movieGenreInfo').querySelector('p').innerText;
+        const overview = event.target.closest('.movieGenreInfo').querySelector('p:nth-last-child(2)').innerText;
+        const genre1 = event.target.closest('.movieGenreInfo').querySelector('ul li:nth-child(1)').innerText;
+        const genre2 = event.target.closest('.movieGenreInfo').querySelector('ul li:nth-child(2)').innerText;
+        const genres = [genre1, genre2];
+        addOrDeleteFavs({infoIdMovie, titleMovie, pictureMovie, points, overview, genres});
+        // if(!location.hash.startsWith('#genre') && !location.hash.startsWith('#type') && !location.hash.startsWith('#search') && !location.hash.startsWith('#movie')) {
+        //     drawFavsMovies()
+        //     console.log('entro desde sectionMovies recomendaciones ');               
+        // } 
+    }  
+})
+sectionPreviewTrendingMovies.addEventListener('click', (event) => {
+    if (event.target.closest('.backgroundImageMovie button')) {
+        console.log('aqui');        
+        const heart = event.target.closest('.btnLike')
+        heart.classList.toggle('likedTrending')
+        // if (heart.classList.contains('likeTrending')) {
+        //     console.log('entro por que hay un likeTrending');            
+        //     heart.classList.remove('likeTrending')
+        //     heart.classList.add('likedTrending')
+        // }else{
+        //     console.log('entro por que no hay un likeTrending');
+        //     heart.classList.remove('likedTrending')
+        //     heart.classList.add('likeTrending')
+        // }
+        const infoIdMovie = event.target.closest('.backgroundImageMovie').getAttribute('id-movie');
+        const pictureMovie = event.target.closest('.backgroundImageMovie').querySelector('img').getAttribute('src');
+        const titleMovie = event.target.closest('.backgroundImageMovie').querySelector('h2').innerText;
+        const points = event.target.closest('.backgroundImageMovie').querySelector('p').innerText;
+        const overview = event.target.closest('.backgroundImageMovie').querySelector('p:nth-last-child(2)').innerText;
+        const genre1 = event.target.closest('.backgroundImageMovie').querySelector('ul li:nth-child(1)').innerText;
+        const genre2 = event.target.closest('.backgroundImageMovie').querySelector('ul li:nth-child(2)').innerText;
+        const genres = [genre1, genre2];
+        addOrDeleteFavs({infoIdMovie, titleMovie, pictureMovie, points, overview, genres});
+        if (!location.hash.startsWith('#genre') && !location.hash.startsWith('#type') && !location.hash.startsWith('#search') && !location.hash.startsWith('#movie')) {
+            iGenres = 1;
+            getMovies()
+            drawFavsMovies()
+        }         
+    }
+})
+
+function getFavsMovies (){
+    const favs = localStorage.getItem('favs');
+    let favsMovies;
+    if (favs) {
+        favsMovies = JSON.parse(favs);
+        return favsMovies
+    }else{
+        return favsMovies = {};
+    }    
+}
+function addOrDeleteFavs(movie) {
+    const { infoIdMovie, titleMovie, pictureMovie,  points, overview, genres,  } = movie
+    const obj ={
+            infoIdMovie,
+            titleMovie,
+            pictureMovie,
+            points,
+            overview,
+            genres
+    }
+    const favsMovies = getFavsMovies()
+    console.log(favsMovies);    
+    if (favsMovies[infoIdMovie]) {
+        delete favsMovies[infoIdMovie]; 
+    }else{
+        favsMovies[infoIdMovie] = obj;
+    }
+    localStorage.setItem('favs', JSON.stringify(favsMovies));
+}
+
+function drawFavsMovies() {
+    let titleSection = document.createElement('h2')
+    const titleText = document.createTextNode('Tus Peliculas Favoritas')
+    titleSection.append(titleText)
+    const btnPrev = document.createElement('button');
+    const btnNext = document.createElement('button');
+    btnPrev.classList.add('btnPrev');
+    btnNext.classList.add('btnNext');
+    btnPrev.innerHTML = '<';
+    btnNext.innerHTML = '>';
+    btnNext.onclick = (event) => scrollRight(event, true);
+    btnPrev.onclick = (event) => left(event, true);
+    const article = document.createElement('article');
+    article.classList.add('favMovies--container');
+    const favsMovies = getFavsMovies();
+    if (Object.values(favsMovies).length > 0) {
+        Object.values(favsMovies).forEach((movie) => {
+            const div = document.createElement('div');
+            div.classList.add('posterMovieImage')
+            div.setAttribute('id-movie', movie.infoIdMovie)
+            const btnLike = document.createElement('button')
+            btnLike.classList.add('liked')
+            const img = document.createElement('img');
+            img.setAttribute('src', movie.pictureMovie);
+            const infoMovie = document.createElement('div');
+            infoMovie.classList.add('infoMovie');
+            const h3 = document.createElement('h3');
+            const h3Text = document.createTextNode(movie.titleMovie);
+            h3.appendChild(h3Text);
+            const p = document.createElement('p');
+            const imgStar = document.createElement('img');
+            imgStar.setAttribute('src', './src/img/star-regular.png');
+            const pText = document.createTextNode(movie.points);
+            p.append(imgStar, pText);
+            const overview = document.createElement('p');
+            const textOverview = document.createTextNode(movie.overview);
+            overview.appendChild(textOverview);
+            const ul = document.createElement('ul');
+            const li1 = document.createElement('li');
+            const li1Text = document.createTextNode(movie.genres[0]);
+            li1.appendChild(li1Text);
+            const li2 = document.createElement('li');
+            const li2Text = document.createTextNode(movie.genres[1]);
+            li2.appendChild(li2Text);
+            ul.appendChild(li1);
+            ul.appendChild(li2);
+            infoMovie.append(btnLike, h3, p, overview, ul);
+            div.append(img, infoMovie);
+            article.appendChild(div);
+        })
+        sectionFavMovies.innerHTML = ''
+        sectionFavMovies.append(titleSection, btnPrev, btnNext, article);
+    }else{
+        sectionFavMovies.innerHTML = '';
+        sectionFavMovies.append(titleSection, btnPrev, btnNext, article);
+    }
 }

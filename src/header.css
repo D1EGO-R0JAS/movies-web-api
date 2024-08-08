@@ -312,13 +312,19 @@ li.loading{
     height: 150px;
     position: relative;
 }
-.likeTrending::before{
+.backgroundImageMovie button::before{
     content: '💙';
 }
-.likeTrending{
+.backgroundImageMovie button{
     display: none;
 }
-.backgroundImageMovie figure:hover > .likeTrending{
+.backgroundImageMovie .likedTrending::before{
+    content: '💔';
+}
+.backgroundImageMovie .likedTrending{
+    display: none;
+}
+.backgroundImageMovie figure:hover > button{
     display: block;
     position: absolute;
     top: 10px;
@@ -329,7 +335,18 @@ li.loading{
     border: none;
     padding: 2.5px;
     cursor: pointer;
-    opacity: 1;
+}
+.backgroundImageMovie figure:hover > .likedTrending{
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 5px;
+    font-size: 1.6rem;
+    background-color: var(--color-emphasize);
+    border-radius: 50%;
+    border: none;
+    padding: 2.5px;
+    cursor: pointer;
 }
 .backgroundImageMovie img{
     width: 100%;
